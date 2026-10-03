@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Income | SpendWise — Personal Budget and Expense Manager</title>
+<script>
+(function(){
+  var dark = false;
+  try {
+    var t = localStorage.getItem('spendwiseTheme') || localStorage.getItem('spendwise_theme');
+    if (!t && localStorage.getItem('sw-dark') === '1') t = 'dark';
+    dark = (t === 'dark') || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  } catch(e) {}
+  var r = document.documentElement;
+  r.classList.toggle('dark', dark);
+  r.setAttribute('data-theme', dark ? 'dark' : 'light');
+  r.style.colorScheme = dark ? 'dark' : 'light';
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/ui.css">
+<style>
+:root{
+  --navy: #0c1b3a;
+  --side: 248px;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  transition: background-color .25s ease, color .25s ease;
+  overflow-x: hidden;
+}
+h1,h2,h3,h4, .brand, .dash-brand { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
+
+.app { min-height: 100vh; display: flex; }
+.sidebar {
+  width: var(--side);
+  min-height: 100vh;
+  background: linear-gradient(180deg, #0e2144, #09162f);
+  color: #9fb0cc;
+  padding: 24px 14px;
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  z-index: var(--z-sticky);
+  display: flex;
+  flex-direction: column;
+  transition: transform .4s var(--spring);
+}
+.dash-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #fff;
+  font-weight: 800;
+  font-size: 21px;
+  padding: 0 10px;
+  margin-bottom: 30px;
+  text-decoration: none;
+}
+.logo-bars { display: flex; align-items: flex-end; gap: 3px; height: 22px; }
+.logo-bars span { width: 5px; border-radius: 2px; display: block; }
+.logo-bars span:nth-child(1) { height: 10px; background: #a7f3ec; }
+.logo-bars span:nth-child(2) { height: 16px; background: var(--teal-light); }
+.logo-bars span:nth-child(3) { height: 22px; background: var(--teal-dark); }
+
+.nav-title {
+  color: #6d7f9f;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  margin: 0 12px 10px;
+  text-transform: uppercase;
+}
+.dash-nav { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.dash-nav li a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  color: #9fb0cc;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 11px 12px;
+  border-radius: 12px;
+  transition: background .2s ease, color .2s ease, transform .2s var(--ease-out);
+}
+.dash-nav li a:hover { background: rgba(255,255,255,.07); color: #fff; transform: translateX(3px); }
+.dash-nav li.active a, .dash-nav li a.active {
+  background: linear-gradient(90deg, var(--teal), var(--teal-d));
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 8px 20px rgba(20,184,166,.28);
+}
+.dash-nav .dot { width: 20px; display: grid; place-items: center; }
+
+.sidebar-bottom {
+  border-top: 1px solid rgba(255,255,255,.08);
+  padding-top: 14px;
+  margin-top: 10px;
+}
+.sidebar-bottom a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 12px;
+  border-radius: 12px;
+  color: #9fb0cc;
+  font-weight: 500;
+  transition: background .2s, color .2s;
+}
+.sidebar-bottom a:hover { background: rgba(239,68,68,.14); color: #fecaca; }
+
+/* Main layout */
+.main { margin-left: var(--side); width: calc(100% - var(--side)); min-height: 100vh; display: flex; flex-direction: column; }
+.topbar {
+  height: 72px;
+  background: color-mix(in srgb, var(--bg) 84%, transparent);
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 clamp(16px, 3vw, 36px);
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+}
+.page-title { display: flex; align-items: center; gap: 12px; }
+.page-title h1 { margin: 0; font-size: clamp(20px, 2.2vw, 24px); font-weight: 800; }
+.page-title p { margin: 2px 0 0; color: var(--muted); font-size: 12.5px; }
+
+.mobile-menu-btn {
+  display: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  place-items: center;
+  cursor: pointer;
+}
+
+.top-actions { display: flex; align-items: center; gap: 12px; }
+.profile { position: relative; }
+.profile-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  padding: 5px 14px 5px 5px;
+  border-radius: 30px;
+  cursor: pointer;
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 13px;
+  transition: transform .2s var(--ease-out), box-shadow .2s;
+}
+.profile-btn:hover { transform: translateY(-2px); box-shadow: var(--sh); }
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--teal), var(--teal-d));
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 14px;
+}
+.profile-menu {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 48px;
+  width: 180px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: var(--sh-lg);
+  padding: 6px;
+  z-index: var(--z-dropdown);
+  animation: swPgIn .2s var(--ease-out) both;
+}
+.profile-menu.show { display: block; }
+.profile-menu button {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  font: 600 13px Inter;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.profile-menu button:hover { background: var(--surface-2); }
+
+.content { padding: 24px clamp(16px, 3vw, 36px) 45px; max-width: 1440px; margin: 0 auto; width: 100%; }
+
+/* Stats cards */
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-bottom: 24px; }
+.stat-card {
+  background: var(--card);
+  border-radius: 18px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  box-shadow: var(--sh);
+}
+.stat-top { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.stat-icon { width: 36px; height: 36px; border-radius: 11px; display: grid; place-items: center; font-size: 18px; }
+.stat-icon.green { background: rgba(16,185,129,.14); color: var(--green); }
+.stat-icon.blue { background: rgba(99,102,241,.14); color: #6366f1; }
+.stat-icon.purple { background: rgba(20,184,166,.14); color: var(--teal-d); }
+.stat-label { font-size: 12px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+.stat-value { font-size: 24px; font-weight: 800; font-family: 'Plus Jakarta Sans'; margin-bottom: 2px; }
+.stat-sub { font-size: 11.5px; color: var(--muted); }
+
+/* Main Grid */
+.grid { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(320px, .95fr); gap: 24px; align-items: start; }
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: var(--sh);
+}
+.card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
+.card-head h2 { font-size: 18px; margin: 0; font-weight: 800; }
+.card-head p { font-size: 12.5px; color: var(--muted); margin: 4px 0 0; }
+.income-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+  background: rgba(20,184,166,.12);
+  color: var(--teal-d);
+  display: grid;
+  place-items: center;
+}
+
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.field.full { grid-column: 1 / -1; }
+.field label { display: block; font-size: 12.5px; font-weight: 700; color: var(--ink); margin: 0 0 6px; }
+.field input, .field select, .field textarea {
+  width: 100%;
+  border: 1.5px solid var(--line);
+  border-radius: 11px;
+  padding: 11px 13px;
+  font: 14px Inter, sans-serif;
+  color: var(--ink);
+  background: var(--card);
+  transition: border-color .2s, box-shadow .2s;
+}
+.field input::placeholder, .field textarea::placeholder { color: var(--muted); opacity: .75; }
+.field textarea { min-height: 84px; resize: vertical; }
+
+.amount-wrap { position: relative; }
+.currency { position: absolute; left: 13px; top: 11px; font-weight: 800; color: var(--teal-d); }
+.amount-wrap input { padding-left: 32px; }
+.check-row { display: flex; align-items: center; gap: 9px; margin-top: 4px; font-size: 13px; color: var(--muted); font-weight: 600; cursor: pointer; }
+.check-row input { accent-color: var(--teal); width: 16px; height: 16px; cursor: pointer; }
+.frequency { display: none; }
+.frequency.show { display: block; }
+
+.form-actions { display: flex; gap: 10px; margin-top: 22px; }
+.submit-btn {
+  flex: 1;
+  padding: 12px 18px;
+  border: 0;
+  border-radius: 12px;
+  color: #fff;
+  font: 700 14px Inter;
+  cursor: pointer;
+  background: linear-gradient(180deg, #17c6b3, var(--teal-d));
+  box-shadow: 0 8px 18px rgba(13,148,136,.3);
+  transition: transform .2s, box-shadow .2s;
+}
+.submit-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(13,148,136,.4); }
+.reset-btn {
+  padding: 12px 18px;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+  color: var(--ink);
+  font: 700 14px Inter;
+  cursor: pointer;
+  transition: background .2s;
+}
+.reset-btn:hover { background: var(--surface-2); }
+
+.side-stack { display: flex; flex-direction: column; gap: 24px; }
+.tip {
+  background: linear-gradient(145deg, #0c1b3a, #123362);
+  border-radius: 20px;
+  padding: 24px;
+  color: #fff;
+  box-shadow: 0 15px 30px rgba(12,27,58,.2);
+  position: relative;
+  overflow: hidden;
+}
+.tip:after {
+  content: '';
+  position: absolute;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  border: 24px solid rgba(20,184,166,.12);
+  right: -50px;
+  top: -50px;
+}
+.tip h3 { margin: 0 0 8px; font-size: 16px; }
+.tip p { margin: 0; color: #a9b6d0; font-size: 12.5px; line-height: 1.6; max-width: 270px; }
+.tip .tip-icon { font-size: 24px; margin-bottom: 12px; color: #5eead4; }
+
+.recent-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.recent-head h3 { font-size: 16px; margin: 0; }
+.recent-head span { font-size: 12px; color: var(--teal-d); font-weight: 700; }
+
+.income-list { display: flex; flex-direction: column; gap: 8px; }
+.income-row {
+  display: grid;
+  grid-template-columns: 40px 1fr auto auto auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 8px;
+  border-radius: 12px;
+  border-bottom: 1px solid var(--line);
+  transition: background .2s, transform .2s var(--ease-out);
+}
+.income-row:hover { background: color-mix(in srgb, var(--surface-2) 65%, transparent); transform: translateX(3px); }
+.income-row:last-child { border-bottom: 0; }
+.row-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(16,185,129,.14);
+  color: var(--green);
+  display: grid;
+  place-items: center;
+}
+.row-main strong { display: block; font-size: 13.5px; }
+.row-main span { font-size: 11.5px; color: var(--muted); }
+.row-right { text-align: right; }
+.row-right strong { display: block; color: var(--green); font-size: 13.5px; font-weight: 700; }
+.row-right span { font-size: 11px; color: var(--muted); }
+
+.delete-row-btn {
+  background: transparent;
+  border: 0;
+  color: var(--muted);
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: color .2s, background .2s;
+}
+.delete-row-btn:hover { color: var(--red); background: rgba(239,68,68,.12); }
+
+.message {
+  display: none;
+  padding: 11px 14px;
+  border-radius: 11px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 14px;
+}
+.message.show { display: block; animation: swPgIn .3s var(--ease-out); }
+.message.success { background: rgba(16,185,129,.15); color: #047857; border: 1px solid rgba(16,185,129,.3); }
+.message.error { background: rgba(239,68,68,.12); color: #b91c1c; border: 1px solid rgba(239,68,68,.25); }
+
+.empty { padding: 26px 0; text-align: center; color: var(--muted); font-size: 13px; }
+.loading { opacity: .6; pointer-events: none; }
+
+@media(max-width: 1050px){
+  :root { --side: 215px; }
+  .grid { grid-template-columns: 1fr; }
+}
+@media(max-width: 768px){
+  :root { --side: 0px; }
+  .sidebar {
+    width: min(290px, 84vw);
+    transform: translateX(-102%);
+    box-shadow: 24px 0 60px rgba(0,0,0,.35);
+  }
+  body.open .sidebar { transform: none; }
+  .main { margin-left: 0; width: 100%; }
+  .mobile-menu-btn { display: grid; }
+  .stats { grid-template-columns: 1fr; }
+  .form-grid { grid-template-columns: 1fr; }
+  .field.full { grid-column: auto; }
+  .form-actions { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+<div class="scrim" id="scrim"></div>
+<div class="app">
+
+<aside class="sidebar" id="sidebar" aria-label="Main navigation">
+  <a class="dash-brand glitch-logo" href="/">
+    <span class="logo-bars"><span></span><span></span><span></span></span>
+    SpendWise
+  </a>
+
+  <div class="nav-title">Main Menu</div>
+  <ul class="dash-nav">
+    <li><a href="/dashboard"><span class="dot"><svg class=ic><use href=#i-home /></svg></span><span>Dashboard</span></a></li>
+    <li class="active"><a href="/income"><span class="dot"><svg class=ic><use href=#i-wallet /></svg></span><span>Income</span></a></li>
+    <li><a href="/expenses"><span class="dot"><svg class=ic><use href=#i-receipt /></svg></span><span>Expenses</span></a></li>
+    <li><a href="/budget"><span class="dot"><svg class=ic><use href=#i-calendar /></svg></span><span>Budget</span></a></li>
+    <li><a href="/reports"><span class="dot"><svg class=ic><use href=#i-trend /></svg></span><span>Reports</span></a></li>
+    <li><a href="/goals"><span class="dot"><svg class=ic><use href=#i-flag /></svg></span><span>Goals</span></a></li>
+    <li><a href="/settings"><span class="dot"><svg class=ic><use href=#i-settings /></svg></span><span>Settings</span></a></li>
+  </ul>
+
+  <div class="sidebar-bottom">
+    <a href="#" id="logoutLink"><span class="dot"><svg class=ic><use href=#i-logout /></svg></span><span>Logout</span></a>
+  </div>
+</aside>
+
+<main class="main">
+  <header class="topbar">
+    <div class="page-title">
+      <button class="mobile-menu-btn" id="mobileMenu" aria-label="Toggle navigation menu"><svg class=ic><use href=#i-menu /></svg></button>
+      <div>
+        <h1>Income</h1>
+        <p>Manage your income sources and keep your finances organized.</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button class="icon-btn" id="themeToggle" title="Toggle theme" aria-label="Toggle theme"><svg class=ic><use href=#i-moon /></svg></button>
+      <div class="profile">
+        <button class="profile-btn" id="profileBtn" aria-label="User profile menu">
+          <div class="avatar" id="avatar">U</div>
+          <span id="userName">User ▾</span>
+        </button>
+        <div class="profile-menu" id="profileMenu">
+          <button onclick="window.location.href='/settings'"><svg class=ic><use href=#i-settings /></svg> Settings</button>
+          <button id="profileLogout"><svg class=ic><use href=#i-logout /></svg> Logout</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="content">
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-top"><div class="stat-icon green"><svg class=ic><use href=#i-wallet /></svg></div><span class="stat-label">Total Income</span></div>
+        <div class="stat-value" id="totalIncome">₹0.00</div>
+        <div class="stat-sub">All recorded income</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-top"><div class="stat-icon blue"><svg class=ic><use href=#i-calendar /></svg></div><span class="stat-label">This Month</span></div>
+        <div class="stat-value" id="monthlyIncome">₹0.00</div>
+        <div class="stat-sub">Income received this month</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-top"><div class="stat-icon purple"><svg class=ic><use href=#i-chart /></svg></div><span class="stat-label">Income Sources</span></div>
+        <div class="stat-value" id="sourceCount">0</div>
+        <div class="stat-sub">Distinct income streams</div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2>Add Income</h2>
+            <p>Record money you receive so SpendWise can update your balance.</p>
+          </div>
+          <div class="income-icon"><svg class="ic svg-pulse"><use href=#i-download /></svg></div>
+        </div>
+
+        <form id="incomeForm">
+          <div class="form-grid">
+            <div class="field">
+              <label for="source">Income source *</label>
+              <input id="source" name="source" type="text" placeholder="e.g. Salary, Freelance, Business" required maxlength="100">
+            </div>
+
+            <div class="field">
+              <label for="amount">Amount *</label>
+              <div class="amount-wrap">
+                <span class="currency">₹</span>
+                <input id="amount" name="amount" type="number" placeholder="45000.00" min="0.01" step="0.01" required>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="category">Category *</label>
+              <select id="category" name="category" required>
+                <option value="">Select category</option>
+                <option value="Salary">Salary</option>
+                <option value="Freelance">Freelance</option>
+                <option value="Business">Business</option>
+                <option value="Investment">Investment</option>
+                <option value="Interest">Interest</option>
+                <option value="Rental Income">Rental Income</option>
+                <option value="Gift">Gift</option>
+                <option value="Bonus">Bonus</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="date">Received date *</label>
+              <input id="date" name="date" type="date" required>
+            </div>
+
+            <div class="field">
+              <label for="account">Account / Wallet</label>
+              <select id="account" name="account">
+                <option value="Bank Account">Bank Account</option>
+                <option value="Cash">Cash</option>
+                <option value="UPI">UPI</option>
+                <option value="Digital Wallet">Digital Wallet</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>Income type</label>
+              <label class="check-row">
+                <input type="checkbox" id="recurring" name="recurring">
+                This is a recurring income
+              </label>
+            </div>
+
+            <div class="field frequency" id="frequencyField">
+              <label for="frequency">Recurring frequency</label>
+              <select id="frequency" name="frequency">
+                <option value="Monthly">Monthly</option>
+                <option value="Weekly">Weekly</option>
+                <option value="Yearly">Yearly</option>
+              </select>
+            </div>
+
+            <div class="field full">
+              <label for="notes">Notes</label>
+              <textarea id="notes" name="notes" placeholder="Optional notes about this income stream..."></textarea>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="submit-btn" id="submitBtn">Add Income →</button>
+            <button type="reset" class="reset-btn" id="resetBtn">Clear</button>
+          </div>
+          <div class="message" id="message" role="alert"></div>
+        </form>
+      </div>
+
+      <div class="side-stack">
+        <div class="tip">
+          <div class="tip-icon"><svg class="ic svg-float"><use href=#i-bulb /></svg></div>
+          <h3>Stay organized</h3>
+          <p>Tracking every income stream allows SpendWise to calculate your true savings rate and accurate budget limits.</p>
+        </div>
+
+        <div class="card">
+          <div class="recent-head">
+            <h3>Recent Income</h3>
+            <span>Latest entries</span>
+          </div>
+          <div class="income-list" id="incomeList">
+            <div class="empty">Loading income...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+</div>
+
+<script>
+const API_URL = "/api/income";
+
+const recurring = document.getElementById("recurring");
+const frequencyField = document.getElementById("frequencyField");
+const form = document.getElementById("incomeForm");
+const message = document.getElementById("message");
+
+document.getElementById("date").value = new Date().toISOString().split("T")[0];
+
+recurring.addEventListener("change", () => {
+  frequencyField.classList.toggle("show", recurring.checked);
+});
+
+function showMessage(text, type){
+  message.textContent = text;
+  message.className = "message show " + type;
+  setTimeout(() => message.classList.remove("show"), 5000);
+}
+
+function money(value){
+  return "₹" + Number(value || 0).toLocaleString("en-IN", {
+    minimumFractionDigits: 2, maximumFractionDigits: 2
+  });
+}
+
+async function setupUser(){
+  try{
+    const cached = JSON.parse(localStorage.getItem("spendwiseUser") || "null");
+    if(cached) applyUser(cached);
+  }catch(_){}
+
+  try{
+    const response = await fetch("/api/me");
+    if(response.status === 401){
+      window.location.href = "/login?next=" + encodeURIComponent(window.location.pathname);
+      return;
+    }
+    const result = await response.json();
+    if(result.success && result.user){
+      localStorage.setItem("spendwiseUser", JSON.stringify(result.user));
+      applyUser(result.user);
+    }
+  }catch(error){
+    console.error(error);
+  }
+}
+
+function applyUser(user){
+  const name = user.first_name || user.name || "User";
+  document.getElementById("userName").textContent = name + " ▾";
+  document.getElementById("avatar").textContent = name.charAt(0).toUpperCase();
+}
+
+function renderIncome(items){
+  const list = document.getElementById("incomeList");
+  if(!items || !items.length){
+    list.innerHTML = `
+      <div class="empty-state">
+        <svg class="ic svg-float"><use href="#i-wallet" /></svg>
+        <h4>No income recorded yet</h4>
+        <p>Use the form on the left to add your first income stream.</p>
+      </div>`;
+    document.getElementById("totalIncome").textContent = "₹0.00";
+    document.getElementById("monthlyIncome").textContent = "₹0.00";
+    document.getElementById("sourceCount").textContent = "0";
+    return;
+  }
+
+  list.innerHTML = items.slice(0, 8).map(item => `
+    <div class="income-row" id="income-row-${item.id}">
+      <div class="row-icon"><svg class="ic"><use href="#i-wallet" /></svg></div>
+      <div class="row-main">
+        <strong>${escapeHtml(item.source || "Income")}</strong>
+        <span>${escapeHtml(item.category || "Other")} · ${formatDate(item.income_date || item.date)}</span>
+      </div>
+      <div class="row-right">
+        <strong>+${money(item.amount)}</strong>
+        <span>${escapeHtml(item.account || "Account")}</span>
+      </div>
+      <button type="button" class="delete-row-btn" title="Edit income" aria-label="Edit income" onclick="startEdit(${item.id})" style="width:auto;padding:0 10px;font-size:12px;font-weight:700;">Edit</button>
+      <button type="button" class="delete-row-btn" aria-label="Delete ${escapeHtml(item.source)}" title="Delete income entry" onclick="deleteIncomeEntry(${item.id}, '${escapeHtml(item.source)}')">
+        <svg class="ic"><use href="#i-trash" /></svg>
+      </button>
+    </div>
+  `).join("");
+
+  const total = items.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+  const now = new Date();
+  const monthTotal = items
+    .filter(item => {
+      const d = new Date(item.income_date || item.date);
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    })
+    .reduce((sum, item) => sum + Number(item.amount || 0), 0);
+  const sources = new Set(items.map(i => (i.source || "").trim().toLowerCase()).filter(Boolean));
+
+  if(window.spendwiseAnimateNumber){
+    window.spendwiseAnimateNumber(document.getElementById("totalIncome"), money(total));
+    window.spendwiseAnimateNumber(document.getElementById("monthlyIncome"), money(monthTotal));
+    window.spendwiseAnimateNumber(document.getElementById("sourceCount"), sources.size);
+  } else {
+    document.getElementById("totalIncome").textContent = money(total);
+    document.getElementById("monthlyIncome").textContent = money(monthTotal);
+    document.getElementById("sourceCount").textContent = sources.size;
+  }
+}
+
+function formatDate(value){
+  if(!value) return "";
+  const d = new Date(value + (String(value).length === 10 ? "T00:00:00" : ""));
+  if(isNaN(d)) return value;
+  return d.toLocaleDateString("en-IN", {day:"2-digit", month:"short", year:"numeric"});
+}
+
+function escapeHtml(value){
+  return String(value ?? "").replace(/[&<>"']/g, c => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+  }[c]));
+}
+
+async function loadIncome(){
+  try{
+    const response = await fetch(API_URL, {method:"GET"});
+    if(response.status === 401){
+      window.location.href = "/login?next=" + encodeURIComponent(window.location.pathname);
+      return;
+    }
+    if(!response.ok) throw new Error("Could not load income");
+    const result = await response.json();
+    const items = Array.isArray(result) ? result : (result.income || result.data || []);
+    incomeItems = items;
+    renderIncome(items);
+  }catch(error){
+    console.error(error);
+    document.getElementById("incomeList").innerHTML =
+      '<div class="empty">Unable to load income records. Make sure the server is reachable.</div>';
+  }
+}
+
+async function deleteIncomeEntry(id, sourceName){
+  const confirmed = await window.spendwiseConfirm({
+    title: "Delete Income Entry",
+    message: `Are you sure you want to delete the "${sourceName}" income entry? This will update your total balance.`,
+    confirmText: "Delete Entry",
+    cancelText: "Cancel",
+    danger: true
+  });
+
+  if(!confirmed) return;
+
+  const row = document.getElementById(`income-row-${id}`);
+  if(row && window.spendwiseAnimateDelete){
+    await window.spendwiseAnimateDelete(row);
+  }
+
+  try{
+    const response = await fetch(`${API_URL}/${id}`, {
+      method: "DELETE"
+    });
+
+    const result = await response.json().catch(() => ({}));
+    if(!response.ok || !result.success){
+      throw new Error(result.message || "Failed to delete income entry");
+    }
+
+    window.showToast("Income entry deleted successfully", "success");
+    await loadIncome();
+  }catch(err){
+    console.error(err);
+    window.showToast(err.message || "Failed to delete income entry", "error");
+  }
+}
+
+let editingId = null;
+let incomeItems = [];
+
+function startEdit(id){
+  const item = incomeItems.find(i => i.id === id);
+  if(!item) return;
+  editingId = id;
+
+  document.getElementById("source").value = item.source || "";
+  document.getElementById("amount").value = Number(item.amount || 0);
+  document.getElementById("category").value = item.category || "";
+  document.getElementById("date").value = String(item.income_date || item.date || "").slice(0, 10);
+  document.getElementById("account").value = item.account || "Bank Account";
+  document.getElementById("notes").value = item.notes || "";
+  recurring.checked = !!item.recurring;
+  frequencyField.classList.toggle("show", recurring.checked);
+  if(item.frequency) document.getElementById("frequency").value = item.frequency;
+
+  document.getElementById("submitBtn").textContent = "Update Income →";
+  form.scrollIntoView({behavior:"smooth", block:"center"});
+}
+
+function exitEditMode(){
+  editingId = null;
+  document.getElementById("submitBtn").textContent = "Add Income →";
+}
+
+form.addEventListener("submit", async e => {
+  e.preventDefault();
+
+  const submitBtn = document.getElementById("submitBtn");
+  submitBtn.disabled = true;
+  submitBtn.textContent = "Saving...";
+  form.classList.add("loading");
+
+  const payload = {
+    source: document.getElementById("source").value.trim(),
+    amount: Number(document.getElementById("amount").value),
+    category: document.getElementById("category").value,
+    income_date: document.getElementById("date").value,
+    account: document.getElementById("account").value,
+    recurring: recurring.checked,
+    frequency: recurring.checked ? document.getElementById("frequency").value : null,
+    notes: document.getElementById("notes").value.trim()
+  };
+
+  try{
+    const url = editingId ? `${API_URL}/${editingId}` : API_URL;
+    const response = await fetch(url, {
+      method: editingId ? "PUT" : "POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(payload)
+    });
+
+    if(response.status === 401){
+      window.location.href = "/login?next=" + encodeURIComponent(window.location.pathname);
+      return;
+    }
+
+    const result = await response.json();
+
+    if(!response.ok || !result.success){
+      throw new Error(result.message || "Unable to save income.");
+    }
+
+    const wasEditing = !!editingId;
+    window.showToast(wasEditing ? "Income updated successfully!" : "Income added successfully!", "success");
+    showMessage(wasEditing ? "Income updated successfully!" : "Income added successfully!", "success");
+    form.reset();
+    document.getElementById("date").value = new Date().toISOString().split("T")[0];
+    frequencyField.classList.remove("show");
+    exitEditMode();
+    await loadIncome();
+  }catch(error){
+    console.error(error);
+    window.showToast(error.message || "Something went wrong. Please try again.", "error");
+    showMessage(error.message || "Something went wrong. Please try again.", "error");
+  }finally{
+    submitBtn.disabled = false;
+    submitBtn.textContent = editingId ? "Update Income →" : "Add Income →";
+    form.classList.remove("loading");
+  }
+});
+
+document.getElementById("resetBtn").addEventListener("click", () => {
+  exitEditMode();
+  setTimeout(() => {
+    document.getElementById("date").value = new Date().toISOString().split("T")[0];
+    frequencyField.classList.remove("show");
+  }, 0);
+});
+
+setupUser();
+loadIncome();
+</script>
+<script src="/static/js/ui.js"></script>
+</body>
+</html>

@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Us — SpendWise</title>
+  <meta name="description"
+    content="Learn about the SpendWise philosophy, our mission for accessible personal finance, and our engineering standards.">
+
+  <script>
+    (function () {
+      var dark = false;
+      try {
+        var t = localStorage.getItem('spendwiseTheme') || localStorage.getItem('spendwise_theme');
+        if (!t && localStorage.getItem('sw-dark') === '1') t = 'dark';
+        dark = (t === 'dark') || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      } catch (e) { }
+      var r = document.documentElement;
+      r.classList.toggle('dark', dark);
+      r.setAttribute('data-theme', dark ? 'dark' : 'light');
+      r.style.colorScheme = dark ? 'dark' : 'light';
+    })();
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/ui.css">
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+      transition: background .3s, color .3s;
+      overflow-x: hidden;
+    }
+
+    h1,
+    h2,
+    h3,
+    .brand {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 clamp(20px, 4.5vw, 64px);
+      height: 74px;
+      background: color-mix(in srgb, var(--card) 90%, transparent);
+      border-bottom: 1px solid var(--line);
+      position: sticky;
+      top: 0;
+      z-index: var(--z-sticky);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 21px;
+      color: var(--ink);
+      text-decoration: none;
+    }
+
+    .logo-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      height: 22px;
+    }
+
+    .logo-bars span {
+      width: 5px;
+      border-radius: 2px;
+      display: block;
+    }
+
+    .logo-bars span:nth-child(1) {
+      height: 10px;
+      background: #5eead4;
+    }
+
+    .logo-bars span:nth-child(2) {
+      height: 16px;
+      background: #14b8a6;
+    }
+
+    .logo-bars span:nth-child(3) {
+      height: 22px;
+      background: #0d9488;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 14px;
+      transition: color .2s;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+      color: var(--teal);
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .auth-cluster {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .user-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 12px 5px 6px;
+      border-radius: 30px;
+      background: var(--card);
+      border: 1px solid var(--line);
+    }
+
+    .user-badge .u-avatar {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--teal), var(--teal-d));
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      font-size: 11px;
+    }
+
+    .user-badge .u-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    /* About Hero */
+    .about-hero {
+      background: radial-gradient(1200px 600px at 15% 10%, #132a56 0%, transparent 60%), linear-gradient(160deg, var(--navy) 0%, #081327 100%);
+      padding: clamp(50px, 7vw, 90px) clamp(20px, 4.5vw, 64px);
+      color: #fff;
+      text-align: center;
+    }
+
+    .about-hero h1 {
+      font-size: clamp(32px, 4vw, 48px);
+      margin: 0 0 16px;
+      color: #ffffff;
+    }
+
+    .about-hero h1 span {
+      background: linear-gradient(90deg, var(--teal-light), var(--teal));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .about-hero p {
+      color: #a9b6d0;
+      max-width: 680px;
+      margin: 0 auto;
+      font-size: 17px;
+      line-height: 1.6;
+    }
+
+    /* Stats Strip */
+    .stats-strip {
+      padding: 44px clamp(20px, 4.5vw, 64px);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 24px;
+      background: var(--card);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .sitem {
+      text-align: center;
+    }
+
+    .sitem h3 {
+      margin: 0;
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--teal);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .sitem p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 13.5px;
+      font-weight: 600;
+    }
+
+    /* Values */
+    .values {
+      padding: 80px clamp(20px, 4.5vw, 64px);
+      background: var(--bg);
+    }
+
+    .section-heading {
+      text-align: center;
+      max-width: 620px;
+      margin: 0 auto 50px;
+    }
+
+    .section-heading h2 {
+      font-size: clamp(26px, 3.2vw, 34px);
+      margin: 0 0 10px;
+    }
+
+    .section-heading p {
+      color: var(--muted);
+      margin: 0;
+      font-size: 15px;
+    }
+
+    .vgrid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .vcard {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 30px 24px;
+      box-shadow: var(--sh);
+      transition: transform .25s var(--ease-out);
+    }
+
+    .vcard:hover {
+      transform: translateY(-4px);
+    }
+
+    .vicon {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: rgba(20, 184, 166, .12);
+      color: var(--teal);
+      display: grid;
+      place-items: center;
+      margin-bottom: 18px;
+    }
+
+    .vcard h4 {
+      margin: 0 0 8px;
+      font-size: 17px;
+      font-weight: 800;
+    }
+
+    .vcard p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13.5px;
+      line-height: 1.55;
+    }
+
+    /* Story */
+    .story-sec {
+      padding: 80px clamp(20px, 4.5vw, 64px);
+      background: var(--card);
+      border-top: 1px solid var(--line);
+    }
+
+    .story-wrap {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .story-wrap h2 {
+      font-size: 28px;
+      margin: 0 0 16px;
+    }
+
+    .story-wrap p {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.7;
+      margin: 0 0 16px;
+    }
+
+    /* CTA Band */
+    .cta-band {
+      margin: 60px clamp(20px, 4.5vw, 64px);
+      padding: clamp(36px, 5vw, 56px);
+      text-align: center;
+      border-radius: 24px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--navy), #0f3d3e);
+    }
+
+    .cta-band h2 {
+      font-size: 28px;
+      margin: 0 0 12px;
+      color: #ffffff;
+    }
+
+    .cta-band p {
+      color: #a9b6d0;
+      max-width: 500px;
+      margin: 0 auto 24px;
+    }
+
+    footer {
+      padding: 36px 20px;
+      text-align: center;
+      background: var(--card);
+      border-top: 1px solid var(--line);
+    }
+
+    footer a {
+      color: var(--muted);
+      text-decoration: none;
+      margin: 0 14px;
+      font-size: 14px;
+      font-weight: 600;
+      transition: color .2s;
+    }
+
+    footer a:hover {
+      color: var(--teal);
+    }
+
+    @media(max-width: 900px) {
+      .nav-links {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav>
+    <a href="/" class="brand">
+      <div class="logo-bars"><span></span><span></span><span></span></div>
+      <span class="glitch-logo" data-text="SpendWise">SpendWise</span>
+    </a>
+
+    <ul class="nav-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/#features">Features</a></li>
+      <li><a href="/about" class="active">About</a></li>
+      <li><a href="/how-it-works">How It Works</a></li>
+      <li><a href="/contact">Contact</a></li>
+    </ul>
+
+    <div class="nav-right">
+      <button class="icon-btn" id="themeToggle" aria-label="Toggle dark/light theme" title="Toggle theme">
+        <svg class="ic">
+          <use href="#i-moon" />
+        </svg>
+      </button>
+
+      <div id="authGuest" class="auth-cluster">
+        <a href="/login" class="btn btn-secondary">Login</a>
+        <a href="/register" class="btn btn-primary">Register</a>
+      </div>
+
+      <div id="authUser" class="auth-cluster" style="display:none;">
+        <div class="user-badge">
+          <div class="u-avatar" id="navAvatar">U</div>
+          <span class="u-name" id="navUserName">User</span>
+        </div>
+        <a href="/dashboard" class="btn btn-primary">Dashboard</a>
+        <button id="logoutBtn" class="btn btn-secondary">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ABOUT HERO -->
+  <section class="about-hero">
+    <h1>Empowering Clarity in <span>Personal Finance</span></h1>
+    <p>SpendWise was built on a simple belief: managing your money shouldn't require complex spreadsheets, paid
+      subscriptions, or giving away your private information.</p>
+  </section>
+
+  <!-- STATS STRIP -->
+  <section class="stats-strip">
+    <div class="sitem">
+      <h3>100% Free</h3>
+      <p>Zero Paywalls or Add-ons</p>
+    </div>
+    <div class="sitem">
+      <h3>60-Day</h3>
+      <p>Privacy Retention Lifecycle</p>
+    </div>
+    <div class="sitem">
+      <h3>Local First</h3>
+      <p>Your Data Remains Yours</p>
+    </div>
+    <div class="sitem">
+      <h3>Lightweight</h3>
+      <p>Ultra-Fast Performance</p>
+    </div>
+  </section>
+
+  <!-- CORE VALUES -->
+  <section class="values">
+    <div class="section-heading">
+      <h2>Our Core Principles</h2>
+      <p>How we design, build, and maintain SpendWise every day.</p>
+    </div>
+
+    <div class="vgrid">
+      <div class="vcard">
+        <div class="vicon"><svg class="ic">
+            <use href="#i-shield" />
+          </svg></div>
+        <h4>Privacy by Default</h4>
+        <p>We do not sell user data, track ad identifiers, or compromise on security. All sessions and queries are
+          isolated.</p>
+      </div>
+
+      <div class="vcard">
+        <div class="vicon"><svg class="ic">
+            <use href="#i-wallet" />
+          </svg></div>
+        <h4>Frictionless Tracking</h4>
+        <p>Log income and expenses in two clicks with clean categorization, immediate totals, and zero clutter.</p>
+      </div>
+
+      <div class="vcard">
+        <div class="vicon"><svg class="ic">
+            <use href="#i-target" />
+          </svg></div>
+        <h4>Actionable Insight</h4>
+        <p>Clear budgets and milestone goals that tell you where your money goes and keep you accountable.</p>
+      </div>
+
+      <div class="vcard">
+        <div class="vicon"><svg class="ic">
+            <use href="#i-brain" />
+          </svg></div>
+        <h4>Thoughtful Engineering</h4>
+        <p>Built with robust HTML5, CSS custom properties, vanilla JavaScript, Python Flask, and MySQL.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- OUR STORY -->
+  <section class="story-sec">
+    <div class="story-wrap">
+      <h2>The SpendWise Story</h2>
+      <p>
+        Modern personal finance apps are filled with credit card offers, intrusive ads, expensive recurring
+        subscriptions, and complicated dashboards that overwhelm everyday people.
+      </p>
+      <p>
+        SpendWise was engineered as a breath of fresh air: clean, minimalist, high-contrast, lightning-fast, and
+        completely focused on what matters most — budgeting, expense awareness, and goal savings.
+      </p>
+      <p>
+        Whether you're saving for your first home, planning next month's travel, or simply ensuring your expenses stay
+        within 80% of your earnings, SpendWise gives you the tools to take control.
+      </p>
+    </div>
+  </section>
+
+  <!-- CTA BAND -->
+  <section class="cta-band">
+    <h2>Take Control of Your Financial Future</h2>
+    <p>Start tracking your expenses and budgeting with SpendWise today.</p>
+    <a href="/register" class="btn btn-primary" style="padding:13px 26px;">
+      <span>Get Started Free</span>
+      <svg class="ic">
+        <use href="#i-arrow" />
+      </svg>
+    </a>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <a href="/">Home</a>
+    <a href="/#features">Features</a>
+    <a href="/about" class="active">About</a>
+    <a href="/how-it-works">How It Works</a>
+    <a href="/contact">Contact</a>
+  </footer>
+
+  <script src="/static/js/ui.js"></script>
+  <script>
+    async function checkAuth() {
+      try {
+        const res = await fetch("/api/dashboard", { headers: { "Accept": "application/json" } });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.success) {
+            document.getElementById("authGuest").style.display = "none";
+            document.getElementById("authUser").style.display = "flex";
+
+            const user = data.user || {};
+            const name = `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.username || "User";
+            document.getElementById("navUserName").textContent = name;
+            document.getElementById("navAvatar").textContent = name.charAt(0).toUpperCase();
+
+            document.getElementById("logoutBtn").addEventListener("click", () => {
+              localStorage.removeItem("spendwiseUser");
+              fetch("/logout", { method: "POST" }).finally(() => window.location.reload());
+            });
+          }
+        }
+      } catch (e) { }
+    }
+    checkAuth();
+  </script>
+</body>
+
+</html>

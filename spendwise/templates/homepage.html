@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SpendWise — Smart Finance. Better Future.</title>
+<meta name="description" content="Personal budget, cash flow tracker, and savings goals manager. Take control of your money with SpendWise.">
+
+<!-- Early theme execution to prevent flash of wrong theme -->
+<script>
+(function(){
+  var dark = false;
+  try {
+    var t = localStorage.getItem('spendwiseTheme') || localStorage.getItem('spendwise_theme');
+    if (!t && localStorage.getItem('sw-dark') === '1') t = 'dark';
+    dark = (t === 'dark') || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  } catch(e) {}
+  var r = document.documentElement;
+  r.classList.toggle('dark', dark);
+  r.setAttribute('data-theme', dark ? 'dark' : 'light');
+  r.style.colorScheme = dark ? 'dark' : 'light';
+})();
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/ui.css">
+
+<style>
+/* Specific Homepage Layout & Visual System */
+body {
+  overflow-x: hidden;
+}
+
+/* HERO SECTION (High-Tech Financial Cockpit) */
+.hero {
+  background: radial-gradient(1100px 600px at 15% 10%, #15325b, transparent 65%), linear-gradient(160deg, var(--navy), #060e1d);
+  padding: clamp(52px, 6.5vw, 92px) clamp(20px, 4.5vw, 64px) clamp(64px, 7.5vw, 108px);
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.15fr);
+  gap: clamp(32px, 4.5vw, 64px);
+  align-items: center;
+  color: #ffffff;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(20, 184, 166, 0.4), transparent);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+}
+
+.hero h1 {
+  font-size: clamp(34px, 4.2vw, 54px);
+  line-height: 1.14;
+  margin: 0 0 20px;
+  color: #ffffff;
+  letter-spacing: -0.03em;
+}
+
+.hero h1 span {
+  background: linear-gradient(90deg, var(--teal-light), var(--teal));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.hero p {
+  color: #a9b6d0;
+  font-size: 17px;
+  line-height: 1.6;
+  max-width: 520px;
+  margin: 0 0 30px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--teal-light);
+  background: rgba(20, 184, 166, 0.15);
+  border: 1px solid rgba(94, 234, 212, 0.3);
+  padding: 8px 18px;
+  border-radius: 30px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 24px;
+}
+
+.feat-row {
+  display: flex;
+  gap: 22px;
+  flex-wrap: wrap;
+  margin-bottom: 34px;
+}
+
+.feat-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #dbe3ee;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.feat-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--teal-light);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.cta-row {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.btn-hero-explore {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  padding: 13px 24px;
+  font-size: 15px;
+}
+
+.btn-hero-explore:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #ffffff !important;
+}
+
+/* Interactive Showcase Mockup */
+.show {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  z-index: 2;
+}
+
+.show-card {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.35);
+  transition: transform 0.3s;
+}
+
+.show-card:hover {
+  transform: translateY(-4px);
+}
+
+.show-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.show-top-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.show-ic {
+  width: 46px;
+  height: 46px;
+  border-radius: 13px;
+  display: grid;
+  place-items: center;
+  background: rgba(20, 184, 166, 0.2);
+  color: var(--teal-light);
+  border: 1px solid rgba(94, 234, 212, 0.2);
+}
+
+.show-val-group small {
+  display: block;
+  color: #a9b6d0;
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.show-val-group strong {
+  font-size: 26px;
+  font-weight: 800;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  color: #ffffff;
+}
+
+.mini-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.mini-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+
+.mini-card small {
+  display: block;
+  color: #94a3b8;
+  font-size: 11.5px;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.mini-card strong {
+  font-size: 17px;
+  font-weight: 800;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* STATS STRIP */
+.stats-strip {
+  padding: 44px clamp(20px, 4.5vw, 64px);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 24px;
+  background: color-mix(in srgb, var(--card) 92%, var(--teal));
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  transition: background-color 0.25s ease, border-color 0.25s ease;
+}
+
+.sitem {
+  text-align: center;
+}
+
+.sitem h3 {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 800;
+  color: var(--teal);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -0.02em;
+}
+
+.sitem p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+/* FEATURES SECTION */
+.features {
+  padding: 88px clamp(20px, 4.5vw, 64px);
+  background: var(--bg);
+  color: var(--ink);
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.section-heading {
+  text-align: center;
+  max-width: 640px;
+  margin: 0 auto 52px;
+}
+
+.section-heading h2 {
+  font-size: clamp(26px, 3.2vw, 36px);
+  margin: 0 0 12px;
+  color: var(--ink);
+  letter-spacing: -0.025em;
+}
+
+.section-heading p {
+  color: var(--muted);
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+.fcard {
+  padding: 30px 26px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: var(--sh);
+  transition: transform 0.25s var(--ease-out), box-shadow 0.25s, border-color 0.2s, background-color 0.25s;
+}
+
+.fcard:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--sh-card-hover);
+}
+
+.ficon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: rgba(20, 184, 166, 0.12);
+  color: var(--teal);
+  display: grid;
+  place-items: center;
+  margin-bottom: 20px;
+}
+
+.fcard h4 {
+  margin: 0 0 8px;
+  font-size: 17.5px;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.fcard p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+/* THREE STEP ONBOARDING */
+.steps-sec {
+  padding: 88px clamp(20px, 4.5vw, 64px);
+  background: var(--surface-2);
+  color: var(--ink);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  transition: background-color 0.25s ease;
+}
+
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.step-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 30px 26px;
+  position: relative;
+  box-shadow: var(--sh);
+}
+
+.step-num {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--teal);
+  background: rgba(20, 184, 166, 0.12);
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 8px;
+  margin-bottom: 18px;
+  letter-spacing: 0.05em;
+}
+
+.step-card h4 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.step-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+/* FAQ SECTION */
+.faq-sec {
+  padding: 88px clamp(20px, 4.5vw, 64px);
+  background: var(--bg);
+  color: var(--ink);
+  transition: background-color 0.25s ease;
+}
+
+.faq-wrap {
+  max-width: 780px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.faq-item {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 18px 22px;
+  background: var(--card);
+  box-shadow: var(--sh-sm);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.faq-item[open] {
+  border-color: color-mix(in srgb, var(--primary) 40%, var(--line));
+}
+
+.faq-item summary {
+  font-weight: 700;
+  font-size: 15.5px;
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--ink);
+}
+
+.faq-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq-item summary span {
+  color: var(--teal);
+  font-size: 18px;
+  font-weight: 700;
+  transition: transform 0.2s;
+}
+
+.faq-item[open] summary span {
+  transform: rotate(45deg);
+}
+
+.faq-item p {
+  margin: 14px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+/* CTA BANNER */
+.cta-band {
+  margin: 64px clamp(20px, 4.5vw, 64px);
+  padding: clamp(40px, 5.5vw, 64px) clamp(24px, 4vw, 48px);
+  text-align: center;
+  border-radius: 24px;
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--navy), #0a2d32);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(20, 184, 166, 0.25);
+}
+
+.cta-band h2 {
+  font-size: clamp(26px, 3.5vw, 38px);
+  margin: 0 0 12px;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+}
+
+.cta-band p {
+  color: #a9b6d0;
+  margin: 0 auto 28px;
+  max-width: 520px;
+  font-size: 15.5px;
+  line-height: 1.6;
+}
+
+/* FOOTER */
+footer {
+  padding: 40px 20px;
+  text-align: center;
+  background: var(--card);
+  border-top: 1px solid var(--line);
+  transition: background-color 0.25s ease, border-color 0.25s ease;
+}
+
+footer a {
+  color: var(--muted);
+  text-decoration: none;
+  margin: 0 16px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+footer a:hover {
+  color: var(--teal);
+}
+
+footer p {
+  margin: 16px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+@media(max-width: 1024px) {
+  .hero {
+    grid-template-columns: 1fr;
+  }
+  .nav-links {
+    display: none;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- NAVIGATION -->
+<nav>
+  <a href="/" class="brand">
+    <div class="logo-bars"><span></span><span></span><span></span></div>
+    <span class="glitch-logo" data-text="SpendWise">SpendWise</span>
+  </a>
+
+  <ul class="nav-links">
+    <li><a href="/" class="active">Home</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="/about">About</a></li>
+    <li><a href="/how-it-works">How It Works</a></li>
+    <li><a href="/contact">Contact</a></li>
+  </ul>
+
+  <div class="nav-right">
+    <button class="icon-btn" id="themeToggle" aria-label="Toggle dark/light theme" title="Toggle theme">
+      <svg class="ic"><use href="#i-moon" /></svg>
+    </button>
+
+    <!-- Guest Actions -->
+    <div id="authGuest" class="auth-group">
+      <a href="/login" class="btn btn-secondary">Login</a>
+      <a href="/register" class="btn btn-primary">Register</a>
+    </div>
+
+    <!-- Authenticated Actions -->
+    <div id="authUser" class="auth-group" style="display:none;">
+      <div class="user-badge-nav">
+        <div class="user-avatar-circle" id="navAvatar">U</div>
+        <span id="navUserName">User</span>
+      </div>
+      <a href="/dashboard" class="btn btn-primary">Dashboard</a>
+      <button onclick="handleLogout()" class="btn btn-secondary">Logout</button>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-content">
+    <span class="pill">
+      <svg class="ic" style="width:14px;height:14px;"><use href="#i-zap" /></svg>
+      Intelligent Personal Finance
+    </span>
+    <h1>Take Complete Control of Your Money with <span>SpendWise</span></h1>
+    <p>Track multi-category expenses, plan monthly budgets, build milestone savings, and gain clarity over your net wealth.</p>
+
+    <div class="feat-row">
+      <div class="feat-item">
+        <div class="feat-icon"><svg class="ic"><use href="#i-receipt" /></svg></div>
+        <span>Track Expenses</span>
+      </div>
+      <div class="feat-item">
+        <div class="feat-icon"><svg class="ic"><use href="#i-calendar" /></svg></div>
+        <span>Set Budgets</span>
+      </div>
+      <div class="feat-item">
+        <div class="feat-icon"><svg class="ic"><use href="#i-flag" /></svg></div>
+        <span>Build Goals</span>
+      </div>
+    </div>
+
+    <div class="cta-row">
+      <a href="/register" id="heroCta" class="btn btn-primary" style="padding:14px 28px; font-size:15px;">
+        <span>Get Started For Free</span>
+        <svg class="ic"><use href="#i-arrow" /></svg>
+      </a>
+      <a href="#features" class="btn btn-hero-explore">
+        <span>Explore Features</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- SHOWCASE PREVIEW -->
+  <div class="show">
+    <div class="show-card">
+      <div class="show-top">
+        <div class="show-top-left">
+          <div class="show-ic"><svg class="ic"><use href="#i-wallet" /></svg></div>
+          <div class="show-val-group">
+            <small>Live Net Balance</small>
+            <strong id="showBal">₹1,24,500.00</strong>
+          </div>
+        </div>
+        <span class="badge" style="background:rgba(16,185,129,.2); color:#6ee7b7; padding:4px 10px; border-radius:8px; font-weight:700; font-size:12px;">+14.2%</span>
+      </div>
+
+      <div class="mini-grid">
+        <div class="mini-card">
+          <small>Monthly Income</small>
+          <strong style="color:var(--teal-l);" id="showInc">₹85,000.00</strong>
+        </div>
+        <div class="mini-card">
+          <small>Monthly Expenses</small>
+          <strong style="color:#fca5a5;" id="showExp">₹42,300.00</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="show-card" style="padding:16px 20px; display:flex; justify-content:space-between; align-items:center;">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <div class="show-ic" style="width:38px; height:38px; background:rgba(16,185,129,.2); color:#6ee7b7;">
+          <svg class="ic"><use href="#i-target" /></svg>
+        </div>
+        <div>
+          <div style="font-size:13.5px; font-weight:700; color:#fff;">Emergency Savings Fund</div>
+          <small style="color:#a9b6d0; font-size:11.5px;">78% of ₹1,00,000 completed</small>
+        </div>
+      </div>
+      <a href="/dashboard" class="btn btn-primary" style="padding:7px 16px; font-size:12.5px;">
+        <span>Dashboard</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- STATS STRIP -->
+<section class="stats-strip">
+  <div class="sitem">
+    <h3 id="statTransactions">0</h3>
+    <p>User Transactions</p>
+  </div>
+  <div class="sitem">
+    <h3 id="statBudgets">0</h3>
+    <p>Active Category Budgets</p>
+  </div>
+  <div class="sitem">
+    <h3 id="statGoals">0</h3>
+    <p>Savings Milestones</p>
+  </div>
+  <div class="sitem">
+    <h3 id="statSaved">₹0</h3>
+    <p>Target Savings Allocated</p>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <div class="section-heading">
+    <h2>Built For Complete Financial Clarity</h2>
+    <p>Every tool you need to track spending, monitor cash flow velocity, and preserve your personal wealth.</p>
+  </div>
+
+  <div class="feature-grid">
+    <div class="fcard">
+      <div class="ficon"><svg class="ic"><use href="#i-receipt" /></svg></div>
+      <h4>Expense Tracking</h4>
+      <p>Log your daily spending with categories, dates, and payment methods in seconds.</p>
+    </div>
+    <div class="fcard">
+      <div class="ficon"><svg class="ic"><use href="#i-wallet" /></svg></div>
+      <h4>Income Streams</h4>
+      <p>Organize multiple revenue sources including salary, investments, and freelance income.</p>
+    </div>
+    <div class="fcard">
+      <div class="ficon"><svg class="ic"><use href="#i-calendar" /></svg></div>
+      <h4>Category Budgets</h4>
+      <p>Establish strict category allowances and monitor threshold progress before overspending.</p>
+    </div>
+    <div class="fcard">
+      <div class="ficon"><svg class="ic"><use href="#i-trend" /></svg></div>
+      <h4>Analytical Reports</h4>
+      <p>Clean visual charts and printable summary breakdowns detailing monthly net cash flow.</p>
+    </div>
+    <div class="fcard">
+      <div class="ficon"><svg class="ic"><use href="#i-flag" /></svg></div>
+      <h4>Savings Milestones</h4>
+      <p>Set custom targets for electronics, emergencies, or travel and allocate capital step-by-step.</p>
+    </div>
+    <div class="fcard">
+      <div class="ficon"><svg class="ic"><use href="#i-shield" /></svg></div>
+      <h4>60-Day Data Lifecycle</h4>
+      <p>Automated 60-day privacy retention ensures your personal financial records stay secure.</p>
+    </div>
+  </div>
+</section>
+
+<!-- THREE STEP ONBOARDING -->
+<section class="steps-sec" id="steps">
+  <div class="section-heading">
+    <h2>Up and Running in 3 Minutes</h2>
+    <p>No spreadsheets, no complicated setups. Start building better money habits today.</p>
+  </div>
+
+  <div class="steps-grid">
+    <div class="step-card">
+      <span class="step-num">Step 01</span>
+      <h4>Create Free Account</h4>
+      <p>Register with your email and personalize your currency and theme in settings.</p>
+    </div>
+    <div class="step-card">
+      <span class="step-num">Step 02</span>
+      <h4>Record Income & Expenses</h4>
+      <p>Enter your regular cash flows with smart auto-categorization and clear labels.</p>
+    </div>
+    <div class="step-card">
+      <span class="step-num">Step 03</span>
+      <h4>Watch Your Wealth Grow</h4>
+      <p>Follow progress rings and visual reports showing exactly where your money goes.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq-sec">
+  <div class="section-heading">
+    <h2>Frequently Asked Questions</h2>
+  </div>
+
+  <div class="faq-wrap">
+    <details class="faq-item">
+      <summary>Is SpendWise free to use? <span>+</span></summary>
+      <p>Yes. Every account starts with full access to all expense, budget, goal, and report features.</p>
+    </details>
+    <details class="faq-item">
+      <summary>How does the 60-day data retention work? <span>+</span></summary>
+      <p>SpendWise maintains an automated 60-day retention cycle from your account creation date to preserve user privacy. You can also wipe your data at any time via Settings.</p>
+    </details>
+    <details class="faq-item">
+      <summary>Can I manage multiple income sources? <span>+</span></summary>
+      <p>Yes. Add salary, investments, freelance payouts, and gifts, tracking them together or filtered by month.</p>
+    </details>
+    <details class="faq-item">
+      <summary>Does SpendWise work smoothly on mobile? <span>+</span></summary>
+      <p>SpendWise is fully responsive and optimized for smartphones, tablets, laptops, and ultra-wide screens.</p>
+    </details>
+  </div>
+</section>
+
+<!-- CTA BAND -->
+<section class="cta-band">
+  <h2>Ready to Master Your Finances?</h2>
+  <p>Join thousands of smart planners who organize their money with SpendWise.</p>
+  <a href="/register" class="btn btn-primary" style="padding:14px 30px; font-size:15px;">
+    <span>Create Your Free Account</span>
+    <svg class="ic"><use href="#i-arrow" /></svg>
+  </a>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div>
+    <a href="/">Home</a>
+    <a href="#features">Features</a>
+    <a href="/about">About</a>
+    <a href="/how-it-works">How It Works</a>
+    <a href="/contact">Contact</a>
+  </div>
+  <p>&copy; SpendWise. Smart Finance. Better Future.</p>
+</footer>
+
+<script src="/static/js/ui.js"></script>
+
+<script>
+// Check Authentication State
+async function checkAuth(){
+  try {
+    const res = await fetch("/api/dashboard", { headers: { "Accept": "application/json" } });
+    if(res.ok){
+      const data = await res.json();
+      if(data && data.success){
+        const guest = document.getElementById("authGuest");
+        const userGroup = document.getElementById("authUser");
+        if(guest) guest.style.display = "none";
+        if(userGroup) userGroup.style.display = "flex";
+
+        const user = data.user || {};
+        const name = `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.username || "User";
+        const navName = document.getElementById("navUserName");
+        const navAv = document.getElementById("navAvatar");
+        if(navName) navName.textContent = name;
+        if(navAv) navAv.textContent = name.charAt(0).toUpperCase();
+
+        const heroCta = document.getElementById("heroCta");
+        if(heroCta){
+          heroCta.href = "/dashboard";
+          const span = heroCta.querySelector("span");
+          if(span) span.textContent = "Go to Dashboard";
+        }
+
+        // Update showcase numbers with real user summary
+        if(data.summary){
+          const showBal = document.getElementById("showBal");
+          const showInc = document.getElementById("showInc");
+          const showExp = document.getElementById("showExp");
+          if(showBal) showBal.textContent = "₹" + Number(data.summary.balance || 0).toLocaleString("en-IN", {minimumFractionDigits:2});
+          if(showInc) showInc.textContent = "₹" + Number(data.summary.total_income || 0).toLocaleString("en-IN", {minimumFractionDigits:2});
+          if(showExp) showExp.textContent = "₹" + Number(data.summary.total_expenses || 0).toLocaleString("en-IN", {minimumFractionDigits:2});
+        }
+        if(data.budgets){
+          const statBud = document.getElementById("statBudgets");
+          if(statBud) statBud.textContent = data.budgets.count || 0;
+        }
+        if(data.goals){
+          const statG = document.getElementById("statGoals");
+          const statS = document.getElementById("statSaved");
+          if(statG) statG.textContent = data.goals.count || 0;
+          if(statS) statS.textContent = "₹" + Number(data.goals.saved || 0).toLocaleString("en-IN");
+        }
+        if(data.total_transactions){
+          const statT = document.getElementById("statTransactions");
+          if(statT) statT.textContent = data.total_transactions;
+        }
+      }
+    }
+  } catch(e){}
+}
+
+function handleLogout(){
+  localStorage.removeItem("spendwiseUser");
+  fetch("/logout", { method: "POST" })
+    .catch(() => {})
+    .finally(() => { window.location.href = "/login"; });
+}
+
+checkAuth();
+</script>
+</body>
+</html>

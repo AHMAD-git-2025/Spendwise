@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login — SpendWise</title>
+<meta name="description" content="Sign in to your SpendWise personal finance dashboard to track expenses and manage budgets.">
+
+<script>
+(function(){
+  var dark = false;
+  try {
+    var t = localStorage.getItem('spendwiseTheme') || localStorage.getItem('spendwise_theme');
+    if (!t && localStorage.getItem('sw-dark') === '1') t = 'dark';
+    dark = (t === 'dark') || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  } catch(e) {}
+  var r = document.documentElement;
+  r.classList.toggle('dark', dark);
+  r.setAttribute('data-theme', dark ? 'dark' : 'light');
+  r.style.colorScheme = dark ? 'dark' : 'light';
+})();
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/ui.css">
+
+<style>
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  perspective: 1500px;
+  transition: background .3s, color .3s;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+h1, h2, h3, .brand { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 clamp(20px, 4.5vw, 64px);
+  height: 74px;
+  background: color-mix(in srgb, var(--card) 90%, transparent);
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  font-size: 21px;
+  color: var(--ink);
+  text-decoration: none;
+}
+.logo-bars { display: flex; align-items: flex-end; gap: 3px; height: 22px; }
+.logo-bars span { width: 5px; border-radius: 2px; display: block; }
+.logo-bars span:nth-child(1) { height: 10px; background: #5eead4; }
+.logo-bars span:nth-child(2) { height: 16px; background: #14b8a6; }
+.logo-bars span:nth-child(3) { height: 22px; background: #0d9488; }
+
+.nav-links {
+  display: flex;
+  gap: 32px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.nav-links a {
+  text-decoration: none;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 14px;
+  transition: color .2s;
+}
+.nav-links a:hover { color: var(--teal); }
+.nav-right { display: flex; align-items: center; gap: 12px; }
+
+/* Auth Layout */
+.auth-wrap {
+  background: radial-gradient(1200px 600px at 15% 10%, #132a56 0%, transparent 60%), linear-gradient(160deg, var(--navy) 0%, #060d1c 100%);
+  min-height: calc(100vh - 74px);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  padding: 60px clamp(20px, 4.5vw, 64px);
+  gap: 60px;
+  position: relative;
+  overflow: hidden;
+}
+.auth-aside { color: #fff; position: relative; z-index: 2; }
+.pill {
+  display: inline-block;
+  background: rgba(20,184,166,0.15);
+  border: 1px solid rgba(94,234,212,0.3);
+  color: var(--teal-light);
+  padding: 8px 18px;
+  border-radius: 30px;
+  font-size: 13.5px;
+  font-weight: 600;
+  margin-bottom: 22px;
+}
+.auth-aside h1 { font-size: clamp(32px, 3.5vw, 42px); font-weight: 800; line-height: 1.2; margin: 0 0 16px; }
+.auth-aside h1 span {
+  background: linear-gradient(90deg, var(--teal-light), var(--teal));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.auth-aside p.lead { color: #a9b6d0; font-size: 16px; line-height: 1.6; max-width: 440px; margin: 0 0 32px; }
+
+.aside-card {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: 420px;
+  margin-bottom: 14px;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.25);
+  transition: transform .25s var(--ease-out);
+}
+.aside-card:hover { transform: translateY(-3px); }
+.aside-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: rgba(20,184,166,0.18);
+  color: var(--teal-light);
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+.aside-card h4 { margin: 0 0 2px; font-size: 14.5px; color: #fff; }
+.aside-card p { margin: 0; font-size: 12.5px; color: #a9b6d0; }
+
+/* Stage & Card */
+.stage { position: relative; z-index: 2; }
+.auth-card {
+  background: var(--card);
+  border-radius: 24px;
+  padding: 44px 40px;
+  max-width: 440px;
+  margin: 0 auto;
+  box-shadow: 0 40px 80px -20px rgba(0,0,0,0.45);
+  border: 1px solid var(--line);
+  transition: transform .3s cubic-bezier(.2,.8,.2,1);
+}
+.auth-card h2 { margin: 0 0 6px; font-size: 24px; font-weight: 800; color: var(--ink); }
+.auth-card p.sub { margin: 0 0 24px; color: var(--muted); font-size: 14px; }
+
+.field { margin-bottom: 18px; }
+.field label { display: block; font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 7px; }
+.field input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1.5px solid var(--line);
+  font: 500 14.5px 'Inter', sans-serif;
+  color: var(--ink);
+  background: var(--card);
+  box-sizing: border-box;
+  transition: border-color .2s;
+}
+.field input:focus { outline: none; border-color: var(--teal); }
+
+.input-wrapper { position: relative; display: flex; align-items: center; }
+.input-wrapper input { padding-right: 44px; }
+.toggle-password {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  transition: color .2s;
+}
+.toggle-password:hover { color: var(--teal); }
+
+.message {
+  display: none;
+  padding: 11px 13px;
+  border-radius: 10px;
+  font-size: 12.5px;
+  font-weight: 700;
+  margin-bottom: 18px;
+}
+.message.show { display: block; }
+.message.success { background: #d1fae5; color: #047857; }
+.message.error { background: #fee2e2; color: #b91c1c; }
+
+.switch-text { text-align: center; font-size: 13.5px; color: var(--muted); margin-top: 20px; }
+.switch-text a { color: var(--teal); font-weight: 700; text-decoration: none; }
+.switch-text a:hover { text-decoration: underline; }
+
+@media(max-width: 960px){
+  .auth-wrap { grid-template-columns: 1fr; padding: 40px 20px; }
+  .auth-aside { display: none; }
+  .nav-links { display: none; }
+}
+</style>
+</head>
+
+<body>
+
+<nav>
+  <a href="/" class="brand">
+    <div class="logo-bars"><span></span><span></span><span></span></div>
+    <span class="glitch-logo" data-text="SpendWise">SpendWise</span>
+  </a>
+
+  <ul class="nav-links">
+    <li><a href="/">Home</a></li>
+    <li><a href="/#features">Features</a></li>
+    <li><a href="/about">About</a></li>
+    <li><a href="/how-it-works">How It Works</a></li>
+    <li><a href="/contact">Contact</a></li>
+  </ul>
+
+  <div class="nav-right">
+    <button class="icon-btn" id="themeToggle" aria-label="Toggle dark/light theme" title="Toggle theme">
+      <svg class="ic"><use href="#i-moon" /></svg>
+    </button>
+    <a href="/register" class="btn btn-primary" style="padding:9px 18px; font-size:13.5px;">Register</a>
+  </div>
+</nav>
+
+<section class="auth-wrap">
+  <div class="auth-aside">
+    <span class="pill">Welcome Back</span>
+    <h1>Take Control of Your<br><span>Financial Reality.</span></h1>
+    <p class="lead">Log in to view your real-time budget allowances, recent cash flows, and goal completion milestones.</p>
+
+    <div class="aside-card">
+      <div class="aside-icon"><svg class="ic"><use href="#i-wallet" /></svg></div>
+      <div>
+        <h4>Real-Time Balances</h4>
+        <p>Dynamic calculations of monthly income vs expenses.</p>
+      </div>
+    </div>
+
+    <div class="aside-card">
+      <div class="aside-icon"><svg class="ic"><use href="#i-shield" /></svg></div>
+      <div>
+        <h4>Encrypted Local Sessions</h4>
+        <p>Flask session authentication with zero 3rd party tracking.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="auth-card">
+      <h2>Welcome Back</h2>
+      <p class="sub">Enter your credentials to access your dashboard.</p>
+
+      <div class="message" id="message"></div>
+
+      <form id="loginForm">
+        <div class="field">
+          <label for="email">Email address</label>
+          <input type="email" id="email" placeholder="you@example.com" required autofocus>
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="input-wrapper">
+            <input type="password" id="password" placeholder="••••••••" required>
+            <button type="button" class="toggle-password" id="togglePasswordBtn" aria-label="Toggle password visibility">
+              <svg class="ic" id="eyeIcon" style="width:18px;height:18px;"><use href="#i-eye" /></svg>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="submitBtn" style="width:100%; padding:13px; font-size:15px; margin-top:6px;">
+          <span>Log In</span>
+          <svg class="ic"><use href="#i-arrow" /></svg>
+        </button>
+      </form>
+
+      <p class="switch-text">Don't have an account? <a href="/register">Create one free</a></p>
+    </div>
+  </div>
+</section>
+
+<script src="/static/js/ui.js"></script>
+<script>
+// Password Visibility Toggle
+const passwordInput = document.getElementById("password");
+const togglePasswordBtn = document.getElementById("togglePasswordBtn");
+const eyeIcon = document.getElementById("eyeIcon");
+
+togglePasswordBtn?.addEventListener("click", () => {
+  const isPw = passwordInput.getAttribute("type") === "password";
+  passwordInput.setAttribute("type", isPw ? "text" : "password");
+  eyeIcon.innerHTML = `<use href="#${isPw ? 'i-eye-off' : 'i-eye'}" />`;
+});
+
+// Card 3D tilt
+if(!window.matchMedia("(prefers-reduced-motion: reduce)").matches){
+  const stage = document.querySelector(".stage");
+  const card = document.querySelector(".auth-card");
+  stage?.addEventListener("mousemove", (e) => {
+    const rect = stage.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    card.style.transform = `rotateY(${x * 8}deg) rotateX(${-y * 8}deg)`;
+  });
+  stage?.addEventListener("mouseleave", () => {
+    card.style.transform = "none";
+  });
+}
+
+function showMessage(text, type){
+  const msg = document.getElementById("message");
+  msg.textContent = text;
+  msg.className = "message show " + type;
+}
+
+function getRedirectTarget(){
+  const params = new URLSearchParams(window.location.search);
+  const next = params.get("next");
+  return next && next.startsWith("/") ? next : "/dashboard";
+}
+
+document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById("submitBtn");
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+
+  btn.disabled = true;
+  btn.innerHTML = `<span>Logging in...</span>`;
+
+  try {
+    const res = await fetch("/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if(!res.ok || !data.success){
+      throw new Error(data.message || "Invalid email or password");
+    }
+
+    localStorage.setItem("spendwiseUser", JSON.stringify(data.user));
+    showMessage("Success! Taking you to your dashboard...", "success");
+    window.location.href = getRedirectTarget();
+  } catch(err){
+    showMessage(err.message || "Login failed. Please check your credentials.", "error");
+    btn.disabled = false;
+    btn.innerHTML = `<span>Log In</span><svg class="ic"><use href="#i-arrow" /></svg>`;
+  }
+});
+</script>
+</body>
+</html>

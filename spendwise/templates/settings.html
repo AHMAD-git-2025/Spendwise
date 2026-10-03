@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SpendWise — Settings</title>
+<meta name="description" content="Manage your account profile, preferences, theme, data retention, and security settings on SpendWise.">
+
+<script>
+(function(){
+  var dark = false;
+  try {
+    var t = localStorage.getItem('spendwiseTheme') || localStorage.getItem('spendwise_theme');
+    if (!t && localStorage.getItem('sw-dark') === '1') t = 'dark';
+    dark = (t === 'dark') || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  } catch(e) {}
+  var r = document.documentElement;
+  r.classList.toggle('dark', dark);
+  r.setAttribute('data-theme', dark ? 'dark' : 'light');
+  r.style.colorScheme = dark ? 'dark' : 'light';
+})();
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/ui.css">
+
+<style>
+:root {
+  --side: 240px;
+}
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+h1, h2, h3, h4, .dash-brand, .stat-val {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.app {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+  width: var(--side);
+  min-height: 100vh;
+  background: #091322;
+  color: #fff;
+  padding: 24px 16px;
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  z-index: var(--z-modal);
+  display: flex;
+  flex-direction: column;
+  transition: transform .3s var(--ease-out);
+}
+.dash-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #fff;
+  font-weight: 800;
+  font-size: 20px;
+  padding: 4px 10px;
+  margin-bottom: 28px;
+}
+.logo-bars { display: flex; align-items: flex-end; gap: 3px; height: 22px; }
+.logo-bars span { width: 5px; border-radius: 2px; display: block; }
+.logo-bars span:nth-child(1) { height: 10px; background: #5eead4; }
+.logo-bars span:nth-child(2) { height: 16px; background: #14b8a6; }
+.logo-bars span:nth-child(3) { height: 22px; background: #0d9488; }
+
+.nav-title {
+  color: #64748b;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin: 0 10px 10px;
+}
+.dash-nav {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+.dash-nav li a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  color: #9fb0cc;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 11px 12px;
+  border-radius: 12px;
+  transition: background .2s ease, color .2s ease, transform .2s var(--ease-out);
+}
+.dash-nav li a:hover { background: rgba(255,255,255,.07); color: #fff; transform: translateX(3px); }
+.dash-nav li.active a, .dash-nav li a.active {
+  background: linear-gradient(90deg, var(--teal), var(--teal-d));
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 8px 20px rgba(20,184,166,.28);
+}
+.dash-nav .dot { width: 20px; display: grid; place-items: center; }
+
+.sidebar-bottom {
+  border-top: 1px solid rgba(255,255,255,.08);
+  padding-top: 14px;
+  margin-top: 10px;
+}
+.sidebar-bottom a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 12px;
+  border-radius: 12px;
+  color: #9fb0cc;
+  font-weight: 500;
+  transition: background .2s, color .2s;
+}
+.sidebar-bottom a:hover { background: rgba(239,68,68,.14); color: #fecaca; }
+
+/* Main area */
+.main {
+  margin-left: var(--side);
+  width: calc(100% - var(--side));
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.topbar {
+  height: 72px;
+  background: color-mix(in srgb, var(--bg) 84%, transparent);
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 clamp(16px, 3vw, 36px);
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+}
+.page-title { display: flex; align-items: center; gap: 12px; }
+.page-title h1 { margin: 0; font-size: clamp(20px, 2.2vw, 24px); font-weight: 800; }
+.page-title p { margin: 2px 0 0; color: var(--muted); font-size: 12.5px; }
+
+.mobile-menu-btn {
+  display: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  place-items: center;
+  cursor: pointer;
+}
+
+.top-actions { display: flex; align-items: center; gap: 12px; }
+.profile { position: relative; }
+.profile-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  padding: 5px 14px 5px 5px;
+  border-radius: 30px;
+  cursor: pointer;
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 13px;
+  transition: transform .2s var(--ease-out), box-shadow .2s;
+}
+.profile-btn:hover { transform: translateY(-2px); box-shadow: var(--sh); }
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--teal), var(--teal-d));
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 14px;
+}
+.profile-menu {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 48px;
+  width: 180px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 16px 36px rgba(0,0,0,.15);
+  padding: 8px;
+  z-index: var(--z-dropdown);
+}
+.profile-menu.show { display: block; }
+.profile-menu a, .profile-menu button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  background: transparent;
+  border: 0;
+  text-decoration: none;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+.profile-menu a:hover, .profile-menu button:hover { background: var(--hover); }
+
+/* Content */
+.content {
+  padding: clamp(20px, 3vw, 36px);
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+/* Retention Banner */
+.retention-card {
+  background: var(--card);
+  border: 1.5px solid var(--line);
+  border-radius: 18px;
+  padding: 22px 26px;
+  margin-bottom: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  box-shadow: var(--sh);
+  flex-wrap: wrap;
+}
+.retention-left { display: flex; align-items: center; gap: 16px; }
+.retention-badge-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: rgba(20,184,166,.12);
+  color: var(--teal);
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+.retention-title { font-size: 16px; font-weight: 800; margin-bottom: 4px; }
+.retention-desc { font-size: 12.5px; color: var(--muted); margin: 0; max-width: 580px; line-height: 1.5; }
+.retention-days {
+  text-align: right;
+  flex: none;
+}
+.retention-number {
+  font-size: 28px;
+  font-weight: 800;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  color: var(--teal);
+}
+.retention-label { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
+
+/* Warning states for retention */
+.retention-card.warning-10 {
+  border-color: #f59e0b;
+  background: color-mix(in srgb, #f59e0b 6%, var(--card));
+}
+.retention-card.warning-10 .retention-number { color: #f59e0b; }
+.retention-card.warning-5 {
+  border-color: #ea580c;
+  background: color-mix(in srgb, #ea580c 8%, var(--card));
+}
+.retention-card.warning-5 .retention-number { color: #ea580c; }
+.retention-card.warning-1 {
+  border-color: var(--red);
+  background: color-mix(in srgb, var(--red) 10%, var(--card));
+}
+.retention-card.warning-1 .retention-number { color: var(--red); }
+
+/* Settings Card & Tabs */
+.settings-nav {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 12px;
+  margin-bottom: 24px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.tab-btn {
+  padding: 10px 18px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: transparent;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  transition: all .2s;
+}
+.tab-btn:hover { background: var(--hover); color: var(--ink); }
+.tab-btn.active {
+  background: var(--card);
+  border-color: var(--line);
+  color: var(--teal);
+  box-shadow: 0 4px 12px rgba(0,0,0,.04);
+}
+
+.settings-pane { display: none; }
+.settings-pane.active { display: block; }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: var(--sh);
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+.card-header {
+  padding: 20px 26px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.card-header h3 { margin: 0; font-size: 17px; font-weight: 800; }
+.card-header span { font-size: 12px; color: var(--muted); }
+.card-body { padding: 26px; }
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+.field { display: flex; flex-direction: column; margin-bottom: 16px; }
+.field.full { grid-column: 1 / -1; }
+.field label {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+.field input, .field select {
+  width: 100%;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font: 500 14px 'Inter', sans-serif;
+  color: var(--ink);
+  background: var(--card);
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color .2s;
+}
+.field input:focus, .field select:focus {
+  border-color: var(--teal);
+}
+
+.toggle-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+  gap: 16px;
+}
+.toggle-item:last-child { border-bottom: 0; }
+.toggle-info h4 { margin: 0 0 3px; font-size: 14px; font-weight: 700; }
+.toggle-info p { margin: 0; font-size: 12px; color: var(--muted); }
+
+/* Switch control */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 26px;
+  flex: none;
+}
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: rgba(148,163,184,.3);
+  border-radius: 34px;
+  transition: .25s;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: .25s;
+  box-shadow: 0 2px 5px rgba(0,0,0,.2);
+}
+input:checked + .slider { background-color: var(--teal); }
+input:checked + .slider:before { transform: translateX(20px); }
+
+/* Danger Zone */
+.danger-zone {
+  border: 1.5px solid rgba(239,68,68,.3);
+  background: color-mix(in srgb, var(--red) 4%, var(--card));
+  border-radius: 18px;
+  padding: 24px;
+  margin-top: 14px;
+}
+.danger-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(239,68,68,.2);
+  gap: 18px;
+  flex-wrap: wrap;
+}
+.danger-row:last-child { border-bottom: 0; padding-bottom: 0; }
+.danger-info h4 { margin: 0 0 4px; font-size: 14.5px; font-weight: 700; color: var(--red); }
+.danger-info p { margin: 0; font-size: 12.5px; color: var(--muted); max-width: 580px; line-height: 1.5; }
+
+/* Scrim */
+.sidebar-scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.5);
+  z-index: calc(var(--z-modal) - 1);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .3s;
+  backdrop-filter: blur(2px);
+}
+.sidebar-scrim.show { opacity: 1; pointer-events: auto; }
+
+/* Responsive adjustments */
+@media(max-width: 860px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); box-shadow: 0 0 50px rgba(0,0,0,.5); }
+  .main { margin-left: 0; width: 100%; }
+  .mobile-menu-btn { display: grid; }
+  .form-grid { grid-template-columns: 1fr; }
+  .field.full { grid-column: auto; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar-scrim" id="sidebarScrim"></div>
+
+<div class="app">
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="dash-brand">
+    <div class="logo-bars"><span></span><span></span><span></span></div>
+    <span class="glitch-logo" data-text="SpendWise">SpendWise</span>
+  </div>
+
+  <div class="nav-title">Main Menu</div>
+  <ul class="dash-nav">
+    <li><a href="/dashboard"><span class="dot"><svg class="ic"><use href="#i-home" /></svg></span><span>Dashboard</span></a></li>
+    <li><a href="/income"><span class="dot"><svg class="ic"><use href="#i-wallet" /></svg></span><span>Income</span></a></li>
+    <li><a href="/expenses"><span class="dot"><svg class="ic"><use href="#i-receipt" /></svg></span><span>Expenses</span></a></li>
+    <li><a href="/budget"><span class="dot"><svg class="ic"><use href="#i-calendar" /></svg></span><span>Budget</span></a></li>
+    <li><a href="/reports"><span class="dot"><svg class="ic"><use href="#i-trend" /></svg></span><span>Reports</span></a></li>
+    <li><a href="/goals"><span class="dot"><svg class="ic"><use href="#i-flag" /></svg></span><span>Goals</span></a></li>
+    <li class="active"><a href="/settings"><span class="dot"><svg class="ic"><use href="#i-settings" /></svg></span><span>Settings</span></a></li>
+  </ul>
+
+  <div class="sidebar-bottom">
+    <a href="#" id="sidebarLogout">
+      <svg class="ic"><use href="#i-logout" /></svg>
+      <span>Logout</span>
+    </a>
+  </div>
+</aside>
+
+<!-- MAIN WRAPPER -->
+<main class="main">
+
+  <header class="topbar">
+    <div class="page-title">
+      <button class="mobile-menu-btn" id="mobileMenu" aria-label="Toggle Navigation Menu">
+        <svg class="ic"><use href="#i-menu" /></svg>
+      </button>
+      <div>
+        <h1>Settings</h1>
+        <p>Manage your account, preferences, theme, and data security.</p>
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <button class="icon-btn" id="themeToggle" aria-label="Toggle dark/light theme" title="Toggle theme">
+        <svg class="ic"><use href="#i-moon" /></svg>
+      </button>
+
+      <div class="profile">
+        <button class="profile-btn" id="profileBtn" aria-haspopup="true" aria-expanded="false">
+          <div class="avatar" id="avatar">U</div>
+          <span id="userName">User</span>
+          <svg class="ic" style="width:14px;height:14px;"><use href="#i-chevron-down" /></svg>
+        </button>
+        <div class="profile-menu" id="profileMenu">
+          <a href="/settings"><svg class="ic"><use href="#i-settings" /></svg> Settings</a>
+          <button id="profileLogout"><svg class="ic"><use href="#i-logout" /></svg> Logout</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="content">
+
+    <!-- 60-DAY DATA RETENTION BANNER -->
+    <div class="retention-card" id="retentionCard">
+      <div class="retention-left">
+        <div class="retention-badge-icon" id="retentionIcon">
+          <svg class="ic"><use href="#i-shield" /></svg>
+        </div>
+        <div>
+          <div class="retention-title" id="retentionTitle">60-Day Data Retention Guarantee</div>
+          <p class="retention-desc" id="retentionDesc">
+            SpendWise maintains a clean 60-day local lifecycle for all financial transactions, budgets, and goals to protect your personal privacy.
+          </p>
+        </div>
+      </div>
+      <div class="retention-days">
+        <div class="retention-number" id="retentionDays">60</div>
+        <div class="retention-label">Days Remaining</div>
+      </div>
+    </div>
+
+    <!-- SETTINGS TABS -->
+    <nav class="settings-nav" aria-label="Settings categories">
+      <button class="tab-btn active" data-tab="profilePane">
+        <svg class="ic"><use href="#i-user" /></svg>
+        <span>Profile</span>
+      </button>
+      <button class="tab-btn" data-tab="preferencesPane">
+        <svg class="ic"><use href="#i-settings" /></svg>
+        <span>Preferences</span>
+      </button>
+      <button class="tab-btn" data-tab="securityPane">
+        <svg class="ic"><use href="#i-lock" /></svg>
+        <span>Security</span>
+      </button>
+      <button class="tab-btn" data-tab="dangerPane">
+        <svg class="ic"><use href="#i-alert" /></svg>
+        <span>Data & Privacy</span>
+      </button>
+    </nav>
+
+    <!-- TAB 1: PROFILE -->
+    <div class="settings-pane active" id="profilePane">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h3>Personal Information</h3>
+            <span>Update your display name and login email</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <form id="profileForm">
+            <div class="form-grid">
+              <div class="field">
+                <label for="firstName">First Name</label>
+                <input type="text" id="firstName" required>
+              </div>
+              <div class="field">
+                <label for="lastName">Last Name</label>
+                <input type="text" id="lastName" required>
+              </div>
+              <div class="field full">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" required>
+              </div>
+            </div>
+            <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:14px;">
+              <button type="submit" class="btn btn-primary" id="saveProfileBtn">
+                <svg class="ic"><use href="#i-check" /></svg>
+                <span>Save Profile</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: PREFERENCES -->
+    <div class="settings-pane" id="preferencesPane">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h3>Display & Localization</h3>
+            <span>Customize how amounts and dates are presented</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="field">
+              <label for="currencySelect">Currency Symbol</label>
+              <select id="currencySelect">
+                <option value="INR" selected>Indian Rupee (₹)</option>
+                <option value="USD">US Dollar ($)</option>
+                <option value="EUR">Euro (€)</option>
+                <option value="GBP">British Pound (£)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="dateFormatSelect">Date Format</label>
+              <select id="dateFormatSelect">
+                <option value="DD/MM/YYYY" selected>DD/MM/YYYY</option>
+                <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="margin-top:20px;">
+            <div class="toggle-item">
+              <div class="toggle-info">
+                <h4>Dark Theme</h4>
+                <p>Toggle deep dark blue interface for lower light fatigue.</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="darkThemeSwitch">
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="toggle-item">
+              <div class="toggle-info">
+                <h4>Budget Overrun Alerts</h4>
+                <p>Highlight categories in warning amber once spending reaches 80%.</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="budgetAlertsSwitch" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; margin-top:24px;">
+            <button type="button" class="btn btn-primary" id="savePreferencesBtn">
+              <svg class="ic"><use href="#i-check" /></svg>
+              <span>Save Preferences</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: SECURITY -->
+    <div class="settings-pane" id="securityPane">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h3>Change Password</h3>
+            <span>Ensure your account is protected by a strong password</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <form id="passwordForm">
+            <div class="field">
+              <label for="currentPassword">Current Password</label>
+              <input type="password" id="currentPassword" required>
+            </div>
+            <div class="form-grid">
+              <div class="field">
+                <label for="newPassword">New Password (min 8 characters)</label>
+                <input type="password" id="newPassword" minlength="8" required>
+              </div>
+              <div class="field">
+                <label for="confirmPassword">Confirm New Password</label>
+                <input type="password" id="confirmPassword" minlength="8" required>
+              </div>
+            </div>
+            <div style="display:flex; justify-content:flex-end; margin-top:14px;">
+              <button type="submit" class="btn btn-primary" id="changePasswordBtn">
+                <svg class="ic"><use href="#i-lock" /></svg>
+                <span>Update Password</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: DATA & PRIVACY (DANGER ZONE) -->
+    <div class="settings-pane" id="dangerPane">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h3 style="color:var(--red);">Danger Zone</h3>
+            <span>Irreversible data and account actions</span>
+          </div>
+        </div>
+        <div class="card-body">
+
+          <div class="danger-zone">
+            <!-- ACTION 1: DELETE MY DATA -->
+            <div class="danger-row">
+              <div class="danger-info">
+                <h4>Delete My Data</h4>
+                <p>
+                  Permanently erase all your recorded income, expenses, budgets, and goals while retaining your login account.
+                </p>
+              </div>
+              <button type="button" class="btn" id="deleteDataBtn" style="background:#ea580c; color:#fff; border:0;">
+                <svg class="ic"><use href="#i-trash" /></svg>
+                <span>Delete My Data</span>
+              </button>
+            </div>
+
+            <!-- ACTION 2: DELETE ACCOUNT -->
+            <div class="danger-row" style="margin-top:14px;">
+              <div class="danger-info">
+                <h4>Delete My Account</h4>
+                <p>
+                  Permanently destroy your SpendWise account and all personal financial records. This operation cannot be reversed.
+                </p>
+              </div>
+              <button type="button" class="btn btn-danger" id="deleteAccountBtn">
+                <svg class="ic"><use href="#i-trash" /></svg>
+                <span>Delete Account</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </section>
+</main>
+</div>
+
+<script src="/static/js/ui.js"></script>
+<script>
+// Tab Navigation
+const tabButtons = document.querySelectorAll(".tab-btn");
+const tabPanes = document.querySelectorAll(".settings-pane");
+
+tabButtons.forEach(btn => {
+  btn.addEventListener("click", () => {
+    tabButtons.forEach(b => b.classList.remove("active"));
+    tabPanes.forEach(p => p.classList.remove("active"));
+
+    btn.classList.add("active");
+    const targetPane = document.getElementById(btn.dataset.tab);
+    if(targetPane) targetPane.classList.add("active");
+  });
+});
+
+// Load Settings & Trial State
+async function loadSettings(){
+  try {
+    const res = await fetch("/api/settings");
+    if(res.status === 401){
+      window.location.href = "/login?next=" + encodeURIComponent(window.location.pathname);
+      return;
+    }
+    const data = await res.json();
+    if(data.user){
+      document.getElementById("firstName").value = data.user.first_name || "";
+      document.getElementById("lastName").value = data.user.last_name || "";
+      document.getElementById("email").value = data.user.email || "";
+
+      const fullName = `${data.user.first_name || ""} ${data.user.last_name || ""}`.trim() || "User";
+      document.getElementById("userName").textContent = fullName;
+      document.getElementById("avatar").textContent = (data.user.first_name || "U").charAt(0).toUpperCase();
+    }
+    if(data.preferences){
+      document.getElementById("currencySelect").value = data.preferences.currency || "INR";
+      document.getElementById("dateFormatSelect").value = data.preferences.date_format || "DD/MM/YYYY";
+      document.getElementById("budgetAlertsSwitch").checked = data.preferences.budget_alerts !== false;
+    }
+  } catch(err){
+    console.error(err);
+  }
+
+  // Load Trial 60-day status
+  try {
+    const trialRes = await fetch("/api/trial");
+    if(trialRes.ok){
+      const tData = await trialRes.json();
+      const days = Number(tData.days_remaining ?? 60);
+      const daysEl = document.getElementById("retentionDays");
+      const cardEl = document.getElementById("retentionCard");
+      const titleEl = document.getElementById("retentionTitle");
+      const descEl = document.getElementById("retentionDesc");
+
+      if(daysEl) daysEl.textContent = days;
+
+      if(cardEl){
+        cardEl.classList.remove("warning-10", "warning-5", "warning-1");
+        if(days <= 1){
+          cardEl.classList.add("warning-1");
+          titleEl.textContent = "Urgent: Final Day of Retention Period";
+          descEl.textContent = "Your 60-day cycle completes today. To reset or clear your financial records safely, export or review your reports.";
+        } else if(days <= 5){
+          cardEl.classList.add("warning-5");
+          titleEl.textContent = "Attention: 5 Days Remaining in Data Cycle";
+          descEl.textContent = "Your financial cycle ends in 5 days. Ensure all necessary reports have been reviewed.";
+        } else if(days <= 10){
+          cardEl.classList.add("warning-10");
+          titleEl.textContent = "Notice: 10 Days Remaining in Data Cycle";
+        }
+      }
+    }
+  } catch(e){}
+
+  // Sync dark theme switch
+  const isDark = document.documentElement.classList.contains("dark") || document.body.classList.contains("dark");
+  document.getElementById("darkThemeSwitch").checked = isDark;
+}
+
+// Dark theme toggle switch in preferences
+document.getElementById("darkThemeSwitch")?.addEventListener("change", (e) => {
+  if(window.SpendWiseTheme){
+    window.SpendWiseTheme.set(e.target.checked ? "dark" : "light");
+  }
+});
+
+// Update Profile
+document.getElementById("profileForm")?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById("saveProfileBtn");
+  btn.disabled = true;
+
+  try {
+    const payload = {
+      first_name: document.getElementById("firstName").value.trim(),
+      last_name: document.getElementById("lastName").value.trim(),
+      email: document.getElementById("email").value.trim()
+    };
+    const res = await fetch("/api/settings/profile", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json().catch(() => ({}));
+    if(!res.ok) throw new Error(data.message || "Failed to update profile");
+
+    window.showToast("Profile details updated successfully!", "success");
+    const fullName = `${payload.first_name} ${payload.last_name}`.trim();
+    document.getElementById("userName").textContent = fullName;
+    document.getElementById("avatar").textContent = payload.first_name.charAt(0).toUpperCase();
+  } catch(err){
+    window.showToast(err.message || "Could not save profile", "error");
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+// Update Preferences
+document.getElementById("savePreferencesBtn")?.addEventListener("click", async () => {
+  const btn = document.getElementById("savePreferencesBtn");
+  btn.disabled = true;
+
+  try {
+    const payload = {
+      currency: document.getElementById("currencySelect").value,
+      date_format: document.getElementById("dateFormatSelect").value,
+      budget_alerts: document.getElementById("budgetAlertsSwitch").checked,
+      dark_mode: document.getElementById("darkThemeSwitch").checked
+    };
+    const res = await fetch("/api/settings/preferences", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json().catch(() => ({}));
+    if(!res.ok) throw new Error(data.message || "Failed to update preferences");
+
+    window.showToast("Preferences saved!", "success");
+  } catch(err){
+    window.showToast(err.message || "Could not save preferences", "error");
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+// Change Password
+document.getElementById("passwordForm")?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const cur = document.getElementById("currentPassword").value;
+  const nw = document.getElementById("newPassword").value;
+  const conf = document.getElementById("confirmPassword").value;
+
+  if(nw !== conf){
+    window.showToast("New passwords do not match.", "error");
+    return;
+  }
+  if(nw.length < 8){
+    window.showToast("New password must be at least 8 characters long.", "error");
+    return;
+  }
+
+  const btn = document.getElementById("changePasswordBtn");
+  btn.disabled = true;
+
+  try {
+    const res = await fetch("/api/settings/password", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ current_password: cur, new_password: nw })
+    });
+    const data = await res.json().catch(() => ({}));
+    if(!res.ok) throw new Error(data.message || "Password update failed");
+
+    window.showToast("Password updated successfully!", "success");
+    document.getElementById("passwordForm").reset();
+  } catch(err){
+    window.showToast(err.message || "Could not change password", "error");
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+// Delete My Data (Reset financial data without deleting user)
+document.getElementById("deleteDataBtn")?.addEventListener("click", async () => {
+  const confirmed = await window.spendwiseConfirm({
+    title: "Delete All Financial Data",
+    message: "This will permanently wipe all your income, expenses, budgets, and goals while keeping your account active. Are you sure you wish to proceed?",
+    confirmText: "Delete Financial Data",
+    isDestructive: true
+  });
+  if(!confirmed) return;
+
+  try {
+    const res = await fetch("/api/account/data", { method: "DELETE" });
+    const data = await res.json().catch(() => ({}));
+    if(!res.ok) throw new Error(data.message || "Failed to delete data");
+
+    window.showToast("All financial data has been wiped.", "success");
+    setTimeout(() => { window.location.href = "/dashboard"; }, 1000);
+  } catch(err){
+    window.showToast(err.message || "Could not wipe financial data", "error");
+  }
+});
+
+// Delete My Account
+document.getElementById("deleteAccountBtn")?.addEventListener("click", async () => {
+  const confirmed = await window.spendwiseConfirm({
+    title: "Delete SpendWise Account",
+    message: "Permanently delete your account along with all historical transactions, budgets, goals, and settings. This cannot be undone.",
+    confirmText: "Delete Account Permanently",
+    isDestructive: true
+  });
+  if(!confirmed) return;
+
+  try {
+    const res = await fetch("/api/account", { method: "DELETE" });
+    const data = await res.json().catch(() => ({}));
+    if(!res.ok) throw new Error(data.message || "Failed to delete account");
+
+    localStorage.removeItem("spendwiseUser");
+    window.showToast("Account deleted successfully.", "success");
+    setTimeout(() => { window.location.href = "/register"; }, 1000);
+  } catch(err){
+    window.showToast(err.message || "Could not delete account", "error");
+  }
+});
+
+// Drawer & Scrim
+const mobileMenu = document.getElementById("mobileMenu");
+const sidebar = document.getElementById("sidebar");
+const sidebarScrim = document.getElementById("sidebarScrim");
+function toggleSidebar(){
+  sidebar.classList.toggle("open");
+  sidebarScrim.classList.toggle("show");
+}
+mobileMenu?.addEventListener("click", toggleSidebar);
+sidebarScrim?.addEventListener("click", toggleSidebar);
+
+// Profile
+const profileBtn = document.getElementById("profileBtn");
+const profileMenu = document.getElementById("profileMenu");
+profileBtn?.addEventListener("click", (e) => {
+  e.stopPropagation();
+  const show = profileMenu.classList.toggle("show");
+  profileBtn.setAttribute("aria-expanded", show);
+});
+document.addEventListener("click", (e) => {
+  if(!e.target.closest(".profile")){
+    profileMenu?.classList.remove("show");
+    profileBtn?.setAttribute("aria-expanded", "false");
+  }
+});
+
+// Logout
+function handleLogout(){
+  localStorage.removeItem("spendwiseUser");
+  fetch("/logout", { method: "POST" })
+    .catch(() => {})
+    .finally(() => { window.location.href = "/login"; });
+}
+document.getElementById("profileLogout")?.addEventListener("click", handleLogout);
+document.getElementById("sidebarLogout")?.addEventListener("click", (e) => {
+  e.preventDefault();
+  handleLogout();
+});
+
+// Init
+loadSettings();
+</script>
+</body>
+</html>
