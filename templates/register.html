@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register — SpendWise</title>
+<meta name="description" content="Create your free SpendWise account and take control of your income, expenses, and savings goals.">
+
+<script>
+(function(){
+  var dark = false;
+  try {
+    var t = localStorage.getItem('spendwiseTheme') || localStorage.getItem('spendwise_theme');
+    if (!t && localStorage.getItem('sw-dark') === '1') t = 'dark';
+    dark = (t === 'dark') || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  } catch(e) {}
+  var r = document.documentElement;
+  r.classList.toggle('dark', dark);
+  r.setAttribute('data-theme', dark ? 'dark' : 'light');
+  r.style.colorScheme = dark ? 'dark' : 'light';
+})();
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/ui.css">
+
+<style>
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  perspective: 1500px;
+  transition: background .3s, color .3s;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+h1, h2, h3, .brand { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 clamp(20px, 4.5vw, 64px);
+  height: 74px;
+  background: color-mix(in srgb, var(--card) 90%, transparent);
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  font-size: 21px;
+  color: var(--ink);
+  text-decoration: none;
+}
+.logo-bars { display: flex; align-items: flex-end; gap: 3px; height: 22px; }
+.logo-bars span { width: 5px; border-radius: 2px; display: block; }
+.logo-bars span:nth-child(1) { height: 10px; background: #5eead4; }
+.logo-bars span:nth-child(2) { height: 16px; background: #14b8a6; }
+.logo-bars span:nth-child(3) { height: 22px; background: #0d9488; }
+
+.nav-links {
+  display: flex;
+  gap: 32px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.nav-links a {
+  text-decoration: none;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 14px;
+  transition: color .2s;
+}
+.nav-links a:hover { color: var(--teal); }
+.nav-right { display: flex; align-items: center; gap: 12px; }
+
+/* Auth Layout */
+.auth-wrap {
+  background: radial-gradient(1200px 600px at 15% 10%, #132a56 0%, transparent 60%), linear-gradient(160deg, var(--navy) 0%, #060d1c 100%);
+  min-height: calc(100vh - 74px);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  padding: 60px clamp(20px, 4.5vw, 64px);
+  gap: 60px;
+  position: relative;
+  overflow: hidden;
+}
+.auth-aside { color: #fff; position: relative; z-index: 2; }
+.pill {
+  display: inline-block;
+  background: rgba(20,184,166,0.15);
+  border: 1px solid rgba(94,234,212,0.3);
+  color: var(--teal-light);
+  padding: 8px 18px;
+  border-radius: 30px;
+  font-size: 13.5px;
+  font-weight: 600;
+  margin-bottom: 22px;
+}
+.auth-aside h1 { font-size: clamp(32px, 3.5vw, 42px); font-weight: 800; line-height: 1.2; margin: 0 0 16px; }
+.auth-aside h1 span {
+  background: linear-gradient(90deg, var(--teal-light), var(--teal));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.auth-aside p.lead { color: #a9b6d0; font-size: 16px; line-height: 1.6; max-width: 440px; margin: 0 0 32px; }
+
+.aside-card {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: 420px;
+  margin-bottom: 14px;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.25);
+  transition: transform .25s var(--ease-out);
+}
+.aside-card:hover { transform: translateY(-3px); }
+.aside-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: rgba(20,184,166,0.18);
+  color: var(--teal-light);
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+.aside-card h4 { margin: 0 0 2px; font-size: 14.5px; color: #fff; }
+.aside-card p { margin: 0; font-size: 12.5px; color: #a9b6d0; }
+
+/* Stage & Card */
+.stage { position: relative; z-index: 2; }
+.auth-card {
+  background: var(--card);
+  border-radius: 24px;
+  padding: 40px 40px;
+  max-width: 460px;
+  margin: 0 auto;
+  box-shadow: 0 40px 80px -20px rgba(0,0,0,0.45);
+  border: 1px solid var(--line);
+  transition: transform .3s cubic-bezier(.2,.8,.2,1);
+}
+.auth-card h2 { margin: 0 0 6px; font-size: 24px; font-weight: 800; color: var(--ink); }
+.auth-card p.sub { margin: 0 0 20px; color: var(--muted); font-size: 14px; }
+
+.name-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.field { margin-bottom: 16px; }
+.field label { display: block; font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 7px; }
+.field input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1.5px solid var(--line);
+  font: 500 14px 'Inter', sans-serif;
+  color: var(--ink);
+  background: var(--card);
+  box-sizing: border-box;
+  transition: border-color .2s;
+}
+.field input:focus { outline: none; border-color: var(--teal); }
+
+.input-wrapper { position: relative; display: flex; align-items: center; }
+.input-wrapper input { padding-right: 44px; }
+.toggle-password {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  transition: color .2s;
+}
+.toggle-password:hover { color: var(--teal); }
+
+.strength-track { height: 5px; border-radius: 4px; background: rgba(148,163,184,.2); margin-top: 8px; overflow: hidden; }
+.strength-fill { height: 100%; width: 0%; border-radius: 4px; background: var(--red); transition: width .25s ease, background .25s ease; }
+.strength-label { font-size: 11.5px; color: var(--muted); margin-top: 5px; font-weight: 600; }
+
+.terms {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 12.5px;
+  color: var(--muted);
+  margin: 16px 0 20px;
+  line-height: 1.45;
+}
+.terms input { margin-top: 3px; accent-color: var(--teal); }
+
+.message {
+  display: none;
+  padding: 11px 13px;
+  border-radius: 10px;
+  font-size: 12.5px;
+  font-weight: 700;
+  margin-bottom: 18px;
+}
+.message.show { display: block; }
+.message.success { background: #d1fae5; color: #047857; }
+.message.error { background: #fee2e2; color: #b91c1c; }
+
+.switch-text { text-align: center; font-size: 13.5px; color: var(--muted); margin-top: 20px; }
+.switch-text a { color: var(--teal); font-weight: 700; text-decoration: none; }
+.switch-text a:hover { text-decoration: underline; }
+
+@media(max-width: 960px){
+  .auth-wrap { grid-template-columns: 1fr; padding: 40px 20px; }
+  .auth-aside { display: none; }
+  .name-row { grid-template-columns: 1fr; }
+  .nav-links { display: none; }
+}
+</style>
+</head>
+
+<body>
+
+<nav>
+  <a href="/" class="brand">
+    <div class="logo-bars"><span></span><span></span><span></span></div>
+    <span class="glitch-logo" data-text="SpendWise">SpendWise</span>
+  </a>
+
+  <ul class="nav-links">
+    <li><a href="/">Home</a></li>
+    <li><a href="/#features">Features</a></li>
+    <li><a href="/about">About</a></li>
+    <li><a href="/how-it-works">How It Works</a></li>
+    <li><a href="/contact">Contact</a></li>
+  </ul>
+
+  <div class="nav-right">
+    <button class="icon-btn" id="themeToggle" aria-label="Toggle dark/light theme" title="Toggle theme">
+      <svg class="ic"><use href="#i-moon" /></svg>
+    </button>
+    <a href="/login" class="btn btn-secondary" style="padding:9px 18px; font-size:13.5px;">Login</a>
+  </div>
+</nav>
+
+<section class="auth-wrap">
+  <div class="auth-aside">
+    <span class="pill">Start Free Today</span>
+    <h1>Financial Peace of Mind<br><span>Starts Right Here.</span></h1>
+    <p class="lead">Create your free account and gain an honest, categorized picture of your earnings, expenditures, and goals.</p>
+
+    <div class="aside-card">
+      <div class="aside-icon"><svg class="ic"><use href="#i-zap" /></svg></div>
+      <div>
+        <h4>Setup in 60 Seconds</h4>
+        <p>No credit card or banking link required to begin.</p>
+      </div>
+    </div>
+
+    <div class="aside-card">
+      <div class="aside-icon"><svg class="ic"><use href="#i-target" /></svg></div>
+      <div>
+        <h4>Goal Tracking Included</h4>
+        <p>Define milestone targets and track your growth.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="auth-card">
+      <h2>Create Your Account</h2>
+      <p class="sub">Free forever. Zero subscriptions or payment walls.</p>
+
+      <div class="message" id="message"></div>
+
+      <form id="registerForm">
+        <div class="name-row">
+          <div class="field">
+            <label for="fname">First name</label>
+            <input type="text" id="fname" placeholder="Ankit" required autofocus>
+          </div>
+          <div class="field">
+            <label for="lname">Last name</label>
+            <input type="text" id="lname" placeholder="Sharma" required>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="remail">Email address</label>
+          <input type="email" id="remail" placeholder="you@example.com" required>
+        </div>
+
+        <div class="field">
+          <label for="rpassword">Password</label>
+          <div class="input-wrapper">
+            <input type="password" id="rpassword" placeholder="Create a strong password" required>
+            <button type="button" class="toggle-password" id="rTogglePasswordBtn" aria-label="Toggle password visibility">
+              <svg class="ic" id="rEyeIcon" style="width:18px;height:18px;"><use href="#i-eye" /></svg>
+            </button>
+          </div>
+          <div class="strength-track"><div class="strength-fill" id="strengthFill"></div></div>
+          <div class="strength-label" id="strengthLabel">Use 8+ characters with uppercase &amp; numbers</div>
+        </div>
+
+        <label class="terms">
+          <input type="checkbox" required>
+          <span>I agree to keep my session credentials safe and adhere to standard terms.</span>
+        </label>
+
+        <button type="submit" class="btn btn-primary" id="submitBtn" style="width:100%; padding:13px; font-size:15px;">
+          <span>Create Account</span>
+          <svg class="ic"><use href="#i-arrow" /></svg>
+        </button>
+      </form>
+
+      <p class="switch-text">Already have an account? <a href="/login">Log in here</a></p>
+    </div>
+  </div>
+</section>
+
+<script src="/static/js/ui.js"></script>
+<script>
+// Password Visibility Toggle
+const pwInput = document.getElementById("rpassword");
+const toggleBtn = document.getElementById("rTogglePasswordBtn");
+const eyeIcon = document.getElementById("rEyeIcon");
+
+toggleBtn?.addEventListener("click", () => {
+  const isPw = pwInput.getAttribute("type") === "password";
+  pwInput.setAttribute("type", isPw ? "text" : "password");
+  eyeIcon.innerHTML = `<use href="#${isPw ? 'i-eye-off' : 'i-eye'}" />`;
+});
+
+// Password Strength Meter
+const fill = document.getElementById("strengthFill");
+const label = document.getElementById("strengthLabel");
+pwInput?.addEventListener("input", () => {
+  const v = pwInput.value;
+  let score = 0;
+  if(v.length >= 8) score++;
+  if(/[A-Z]/.test(v)) score++;
+  if(/[0-9]/.test(v)) score++;
+  if(/[^A-Za-z0-9]/.test(v)) score++;
+  const pct = [0, 25, 50, 75, 100][score];
+  const colors = ["#e2e8f0", "#ef4444", "#f59e0b", "#14b8a6", "#10b981"];
+  const labels = ["Use 8+ characters with uppercase & numbers", "Weak password", "Fair password", "Good password", "Strong password"];
+  fill.style.width = pct + "%";
+  fill.style.background = colors[score];
+  label.textContent = v.length ? labels[score] : labels[0];
+});
+
+// Card 3D tilt
+if(!window.matchMedia("(prefers-reduced-motion: reduce)").matches){
+  const stage = document.querySelector(".stage");
+  const card = document.querySelector(".auth-card");
+  stage?.addEventListener("mousemove", (e) => {
+    const rect = stage.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    card.style.transform = `rotateY(${x * 8}deg) rotateX(${-y * 8}deg)`;
+  });
+  stage?.addEventListener("mouseleave", () => {
+    card.style.transform = "none";
+  });
+}
+
+function showMessage(text, type){
+  const msg = document.getElementById("message");
+  msg.textContent = text;
+  msg.className = "message show " + type;
+}
+
+document.getElementById("registerForm")?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById("submitBtn");
+  const firstName = document.getElementById("fname").value.trim();
+  const lastName = document.getElementById("lname").value.trim();
+  const email = document.getElementById("remail").value.trim();
+  const password = document.getElementById("rpassword").value;
+
+  btn.disabled = true;
+  btn.innerHTML = `<span>Creating account...</span>`;
+
+  try {
+    const res = await fetch("/api/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        first_name: firstName,
+        last_name: lastName,
+        email: email,
+        password: password
+      })
+    });
+    const data = await res.json();
+    if(!res.ok || !data.success){
+      throw new Error(data.message || "Registration failed");
+    }
+
+    showMessage("Account created! Redirecting to login...", "success");
+    setTimeout(() => { window.location.href = "/login"; }, 900);
+  } catch(err){
+    showMessage(err.message || "Could not register account.", "error");
+    btn.disabled = false;
+    btn.innerHTML = `<span>Create Account</span><svg class="ic"><use href="#i-arrow" /></svg>`;
+  }
+});
+</script>
+</body>
+</html>

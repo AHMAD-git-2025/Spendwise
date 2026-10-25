@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SpendWise Admin</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--tx:#1a1d23;--mu:#6b7280;--bd:#e5e7eb;--ac:#0f766e;--acbg:#ccfbf1;--hd:#f1f5f9;--warn:#b45309;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1318;--card:#171c23;--tx:#e6e9ee;--mu:#98a2b3;--bd:#2a313b;--ac:#2dd4bf;--acbg:#12332f;--hd:#1e252e;--warn:#fbbf24}}
+:root[data-theme="dark"]{--bg:#0f1318;--card:#171c23;--tx:#e6e9ee;--mu:#98a2b3;--bd:#2a313b;--ac:#2dd4bf;--acbg:#12332f;--hd:#1e252e;--warn:#fbbf24}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.app{display:flex;min-height:100vh}
+aside{width:230px;background:var(--card);border-right:1px solid var(--bd);padding:16px 10px;flex-shrink:0}
+aside h1{font-size:16px;margin:0 8px 2px}aside small{display:block;color:var(--mu);margin:0 8px 14px}
+.nav{display:flex;justify-content:space-between;width:100%;padding:8px 10px;border:0;background:none;color:var(--tx);border-radius:8px;cursor:pointer;font:inherit;text-align:left}
+.nav:hover{background:var(--hd)}.nav.on{background:var(--acbg);color:var(--ac);font-weight:600}
+.nav span{color:var(--mu);font-size:12px}
+main{flex:1;min-width:0;padding:20px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px}
+.stat{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:12px}
+.stat b{display:block;font-size:22px}.stat i{color:var(--mu);font-style:normal;font-size:12px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.bar h2{margin:0;font-size:18px;margin-right:auto}
+input,button.b{font:inherit;padding:7px 10px;border:1px solid var(--bd);border-radius:8px;background:var(--card);color:var(--tx)}
+button.b{cursor:pointer}button.b.on{background:var(--ac);color:var(--bg);border-color:var(--ac)}
+.wrap{overflow-x:auto;background:var(--card);border:1px solid var(--bd);border-radius:10px}
+table{border-collapse:collapse;width:100%;white-space:nowrap}
+th,td{padding:8px 12px;border-bottom:1px solid var(--bd);text-align:left}
+th{background:var(--hd);font-size:12px;color:var(--mu);position:sticky;top:0;cursor:pointer;user-select:none}
+tr:last-child td{border-bottom:0}
+.null{color:var(--mu);font-style:italic}.mask{color:var(--warn)}
+.tag{display:inline-block;font-size:11px;padding:1px 6px;border-radius:5px;background:var(--acbg);color:var(--ac);margin-right:3px}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px}
+.fk{margin-top:12px;color:var(--mu);font-size:13px}
+.del-btn{background:#fee2e2;color:#b91c1c;border:1px solid #fca5a5;padding:3px 9px;border-radius:6px;cursor:pointer;font:inherit;font-size:12px;font-weight:600;transition:all .15s}
+.del-btn:hover{background:#dc2626;color:#fff;border-color:#dc2626}
+.del-btn:disabled{opacity:0.6;cursor:not-allowed}
+:root[data-theme="dark"] .del-btn{background:#450a0a;color:#fca5a5;border-color:#991b1b}
+:root[data-theme="dark"] .del-btn:hover{background:#dc2626;color:#fff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .del-btn{background:#450a0a;color:#fca5a5;border-color:#991b1b}:root:not([data-theme="light"]) .del-btn:hover{background:#dc2626;color:#fff}}
+@media (max-width:720px){.app{flex-direction:column}aside{width:100%;display:flex;overflow-x:auto;gap:4px;border-right:0;border-bottom:1px solid var(--bd)}aside h1,aside small{display:none}.nav{width:auto;gap:6px;white-space:nowrap}}
+</style></head><body>
+<div class="app"><aside><h1>💸 SpendWise Admin</h1><small id="dbn"></small><div id="nav"></div></aside>
+<main><div class="cards" id="cards"></div>
+<div class="bar"><h2 id="tt"></h2><input id="q" placeholder="Search rows…"><button class="b on" id="bd">Data</button><button class="b" id="bs">Schema</button><form method="post" action="/admin/logout" id="lo" style="margin:0"><button class="b" type="submit" style="border-color:#dc2626;color:#dc2626">Logout</button></form></div>
+<div class="wrap" id="view"></div><div class="fk" id="fk"></div></main></div>
+<script>
+const EMBED=/*DATA*/null;
+let DB,cur,mode='data',sortK=null,sortD=1;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+(EMBED?Promise.resolve(EMBED):fetch('/admin/api/data',{cache:'no-store',credentials:'same-origin'}).then(r=>{if(r.status===401){location.replace('/admin/login');throw new Error('Session expired')}return r.json()})).then(d=>{DB=d;cur=d.tables[0].name;init()}).catch(e=>{$('view').textContent='Failed to load: '+e});
+if(EMBED){document.addEventListener('submit',e=>{e.preventDefault();alert('Logout works on your local server at /admin.')})}
+else{
+ // Back/Forward cache: if the page is restored from history, re-check the session.
+ const check=()=>fetch('/admin/api/ping',{cache:'no-store',credentials:'same-origin'}).then(r=>{if(r.status===401)location.replace('/admin/login')}).catch(()=>{});
+ window.addEventListener('pageshow',e=>{if(e.persisted){document.body.style.visibility='hidden';check().then(()=>location.reload())}});
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden)check()});
+ setInterval(check,60000);
+}
+function init(){
+ $('dbn').textContent=DB.database+' · '+DB.engine;
+ const rows=DB.tables.reduce((a,t)=>a+t.row_count,0);
+ $('cards').innerHTML=[['Tables',DB.tables.length],['Total rows',rows],['Columns',DB.tables.reduce((a,t)=>a+t.columns.length,0)],['Foreign keys',DB.tables.reduce((a,t)=>a+t.foreign_keys.length,0)]].map(x=>`<div class="stat"><b>${x[1]}</b><i>${x[0]}</i></div>`).join('');
+ $('nav').innerHTML=DB.tables.map(t=>`<button class="nav" data-t="${t.name}">${t.name}<span>${t.row_count}</span></button>`).join('');
+ $('nav').onclick=e=>{const b=e.target.closest('.nav');if(b){cur=b.dataset.t;sortK=null;$('q').value='';render()}};
+ $('q').oninput=render;
+ $('bd').onclick=()=>{mode='data';render()};$('bs').onclick=()=>{mode='schema';render()};
+ render();
+}
+function cell(c,v){
+ if(v===null||v===undefined)return'<span class="null">NULL</span>';
+ if(c.name==='password')return'<span class="mask">••••••••(hashed)</span>';
+ return esc(v);
+}
+function render(){
+ const t=DB.tables.find(x=>x.name===cur);
+ document.querySelectorAll('.nav').forEach(b=>b.classList.toggle('on',b.dataset.t===cur));
+ $('bd').classList.toggle('on',mode==='data');$('bs').classList.toggle('on',mode==='schema');
+ $('tt').textContent=t.name+' · '+t.row_count+' rows';
+ $('q').style.display=mode==='data'?'':'none';
+ $('fk').innerHTML=t.foreign_keys.length?'Foreign keys: '+t.foreign_keys.map(f=>`<code>${f.column}</code> → <code>${f.references_table}.${f.references_column}</code>${f.on_delete?' (ON DELETE '+f.on_delete+')':''}`).join(' · '):'No foreign keys.';
+ if(mode==='schema'){
+  $('view').innerHTML='<table><thead><tr><th>Column</th><th>Type</th><th>Null</th><th>Default</th><th>Flags</th></tr></thead><tbody>'+t.columns.map(c=>`<tr><td><code>${c.name}</code></td><td><code>${esc(c.type)}</code></td><td>${c.nullable?'YES':'NO'}</td><td>${c.default===null?'<span class="null">—</span>':esc(c.default)}</td><td>${[c.primary_key&&'PK',c.auto_increment&&'AUTO',c.unique&&'UNIQUE',t.foreign_keys.some(f=>f.column===c.name)&&'FK'].filter(Boolean).map(x=>`<span class="tag">${x}</span>`).join('')}</td></tr>`).join('')+'</tbody></table>';
+  return;
+ }
+ let r=t.rows.slice();const q=$('q').value.toLowerCase();
+ if(q)r=r.filter(x=>Object.values(x).some(v=>String(v).toLowerCase().includes(q)));
+ if(sortK)r.sort((a,b)=>(a[sortK]>b[sortK]?1:a[sortK]<b[sortK]?-1:0)*sortD);
+ const hasPk=!!t.primary_key;
+ const isUsers=t.name==='users';
+ const colsHtml=t.columns.map(c=>`<th data-k="${c.name}">${c.name}${sortK===c.name?(sortD>0?' ▲':' ▼'):''}</th>`).join('')+(hasPk?`<th style="width:110px;text-align:center;cursor:default;">Action</th>`:'');
+ const rowsHtml=r.length?r.map(x=>{
+  const pkVal=x[t.primary_key];
+  const label=esc(x.email||x.first_name||x.description||x.source||pkVal);
+  const delBtn=hasPk?`<td style="text-align:center;"><button class="del-btn" data-tbl="${t.name}" data-id="${pkVal}" data-name="${label}">${isUsers?'Delete User':'Delete'}</button></td>`:'';
+  return '<tr>'+t.columns.map(c=>`<td>${cell(c,x[c.name])}</td>`).join('')+delBtn+'</tr>';
+ }).join(''):`<tr><td colspan="${t.columns.length+(hasPk?1:0)}" class="null">No rows</td></tr>`;
+ $('view').innerHTML='<table><thead><tr>'+colsHtml+'</tr></thead><tbody>'+rowsHtml+'</tbody></table>';
+
+ const thead=$('view').querySelector('thead');
+ if(thead){
+  thead.onclick=e=>{
+   const th=e.target.closest('th[data-k]');
+   if(th){
+    const k=th.dataset.k;
+    sortD=sortK===k?-sortD:1;
+    sortK=k;
+    render();
+   }
+  };
+ }
+
+ const tbody=$('view').querySelector('tbody');
+ if(tbody){
+  tbody.onclick=async e=>{
+   const btn=e.target.closest('.del-btn');
+   if(!btn)return;
+   const tbl=btn.dataset.tbl;
+   const id=btn.dataset.id;
+   const name=btn.dataset.name;
+   const isUser=tbl==='users';
+   const confirmPrompt=isUser
+     ?`Permanently delete user "${name}" (ID: ${id})?\n\nThis will remove the user account and all their expenses, income, budgets, goals, and notifications.`
+     :`Delete row #${id} from "${tbl}"?`;
+   if(!confirm(confirmPrompt))return;
+   btn.disabled=true;
+   btn.textContent='Deleting…';
+   try{
+     const url=isUser?`/admin/api/users/${id}`:`/admin/api/table/${tbl}/${id}`;
+     const res=await fetch(url,{method:'DELETE',credentials:'same-origin',headers:{'Accept':'application/json'}});
+     const d=await res.json().catch(()=>({}));
+     if(!res.ok||!d.success){
+       alert(d.error||d.message||'Failed to delete');
+       btn.disabled=false;
+       btn.textContent=isUser?'Delete User':'Delete';
+       return;
+     }
+     const fresh=await fetch('/admin/api/data',{cache:'no-store',credentials:'same-origin'}).then(r=>r.json());
+     DB=fresh;
+     init();
+   }catch(err){
+     alert('Error deleting: '+err.message);
+     btn.disabled=false;
+     btn.textContent=isUser?'Delete User':'Delete';
+   }
+  };
+ }
+}
+</script></body></html>
